@@ -1,7 +1,7 @@
 package com.github.julianthome.automate.slicer;
 
 
-import com.github.julianthome.automate.core.Automaton;
+import com.github.julianthome.automate.core.BasicAutomaton;
 import com.github.julianthome.automate.core.State;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class AutomatonSlicerForward extends AutomatonSlicer {
 
 
-    public AutomatonSlicerForward(Automaton cn) {
+    public AutomatonSlicerForward(BasicAutomaton cn) {
         super(cn);
     }
 

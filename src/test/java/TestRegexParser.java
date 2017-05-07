@@ -17,7 +17,7 @@
 * limitations under the Licence.
 */
 
-import com.github.julianthome.automate.core.Automaton;
+import com.github.julianthome.automate.core.BasicAutomaton;
 import com.github.julianthome.automate.parser.RegexParser;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class TestRegexParser {
     @Test
     public void testPattern0() {
 
-        Automaton a = RegexParser.INSTANCE.getAutomaton("abc*[a-z]?d");
+        BasicAutomaton a = RegexParser.INSTANCE.getAutomaton("abc*[a-z]?d");
 
 
 

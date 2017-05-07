@@ -12,19 +12,19 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Automaton extends DirectedPseudograph<State, Transition> {
+public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(Automaton.class);
+    final static Logger LOGGER = LoggerFactory.getLogger(BasicAutomaton.class);
 
     private State start;
 
     private int snum = 0;
 
-    public Automaton() {
+    public BasicAutomaton() {
         this(false);
     }
 
-    public Automaton(boolean acceptsEmptyString) {
+    public BasicAutomaton(boolean acceptsEmptyString) {
         super(Transition.class);
         start = createNewState((acceptsEmptyString ? State.Kind.ACCEPT :
                 State.Kind.NORMAL));
@@ -39,7 +39,7 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         return vertexSet().size() == 1 && edgeSet().size() == 0;
     }
 
-    public Automaton(Automaton a) {
+    public BasicAutomaton(BasicAutomaton a) {
         super(Transition.class);
 
         Map<State, State> smap = new HashMap<>();
@@ -67,7 +67,7 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         snum = a.snum;
     }
 
-    private Automaton(State start, Collection<Transition> t) {
+    private BasicAutomaton(State start, Collection<Transition> t) {
         super(Transition.class);
 
         Map<State, State> smap = new HashMap<>();
@@ -161,8 +161,8 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
                 (Collectors.toSet());
     }
 
-    public Automaton expand() {
-        Automaton cp = new Automaton(this);
+    public BasicAutomaton expand() {
+        BasicAutomaton cp = new BasicAutomaton(this);
         cp.addVirtualEnd();
         return cp;
     }
@@ -184,22 +184,22 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         return nend;
     }
 
-    public Automaton concat(Automaton b) {
+    public BasicAutomaton concat(BasicAutomaton b) {
         return concat(b, true);
     }
 
-    public Automaton concat(Automaton b, boolean rmaccept) {
+    public BasicAutomaton concat(BasicAutomaton b, boolean rmaccept) {
 
         if (this.isEmpty() && b.isEmpty()) {
-            return new Automaton(true);
+            return new BasicAutomaton(true);
         } else if (this.isEmpty()) {
-            return new Automaton(b);
+            return new BasicAutomaton(b);
         } else if (b.isEmpty()) {
-            return new Automaton(this);
+            return new BasicAutomaton(this);
         }
 
-        Automaton first = new Automaton(this);
-        Automaton snd = new Automaton(b);
+        BasicAutomaton first = new BasicAutomaton(this);
+        BasicAutomaton snd = new BasicAutomaton(b);
 
         State end = first.addVirtualEnd();
         LOGGER.debug("ffst");
@@ -225,10 +225,10 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
     }
 
 
-    public Automaton intersect(Automaton a) {
+    public BasicAutomaton intersect(BasicAutomaton a) {
 
 
-        Automaton ret = new Automaton();
+        BasicAutomaton ret = new BasicAutomaton();
 
         LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
 
@@ -282,7 +282,7 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         return ret;
     }
 
-    public Automaton union(Automaton other) {
+    public BasicAutomaton union(BasicAutomaton other) {
 
         LOGGER.debug("union");
 
@@ -292,7 +292,7 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         LOGGER.debug(">>> union");
 
 
-        Automaton ret = new Automaton();
+        BasicAutomaton ret = new BasicAutomaton();
         Map<State, State> smap1 = new HashMap<>();
         Map<State, State> smap2 = new HashMap<>();
 
@@ -334,6 +334,9 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
     }
 
 
+
+
+
     private Set<State> getConnectedOutNodes(State s) {
         return outgoingEdgesOf(s).stream().map(Transition::getTarget)
                 .collect(Collectors.toSet());
@@ -350,12 +353,12 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
     }
 
 
-    public Automaton optional() {
-        return this.union(new Automaton(true));
+    public BasicAutomaton optional() {
+        return this.union(new BasicAutomaton(true));
     }
 
-    public Automaton star() {
-        Automaton opt = optional();
+    public BasicAutomaton star() {
+        BasicAutomaton opt = optional();
 
         for (State a : opt.getAcceptStates()) {
             opt.addTransition(new Transition(a, opt.start));
@@ -363,10 +366,10 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         return opt.determinize();
     }
 
-    public Automaton repeat(int min, int max) {
+    public BasicAutomaton repeat(int min, int max) {
 
-        Automaton pat = new Automaton(this);
-        Automaton tauto = new Automaton();
+        BasicAutomaton pat = new BasicAutomaton(this);
+        BasicAutomaton tauto = new BasicAutomaton();
 
         if (min == 0) {
             tauto = pat.optional();
@@ -383,17 +386,17 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         return tauto.determinize();
     }
 
-    public Automaton plus() {
-        Automaton pat = new Automaton(this);
+    public BasicAutomaton plus() {
+        BasicAutomaton pat = new BasicAutomaton(this);
         return pat.concat(pat.star(), false);
     }
 
-    public Automaton append(char c) {
+    public BasicAutomaton append(char c) {
         LOGGER.debug("append 1");
         return append(new CharRange(c, c));
     }
 
-    public Automaton append(char min, char max) {
+    public BasicAutomaton append(char min, char max) {
         LOGGER.debug("append 2");
         return append(new CharRange(min, max));
 
@@ -587,9 +590,9 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
      *
      * @return
      */
-    public Automaton determinize() {
+    public BasicAutomaton determinize() {
 
-        Automaton dfa = new Automaton();
+        BasicAutomaton dfa = new BasicAutomaton();
 
         Map<State, Set<State>> eclosure = getEpsilonClosure();
 
@@ -617,8 +620,8 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
                                      Set<Set<State>> visited,
                                      Map<Set<State>, State> nstat,
                                      Map<State, Set<State>> eclosure,
-                                     Automaton nfa,
-                                     Automaton dfa) {
+                                     BasicAutomaton nfa,
+                                     BasicAutomaton dfa) {
 
 
 
@@ -717,9 +720,9 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
 
 
 
-    public Automaton append(TransitionLabel r) {
+    public BasicAutomaton append(TransitionLabel r) {
 
-        Automaton a = new Automaton(this);
+        BasicAutomaton a = new BasicAutomaton(this);
         assert a.start != null;
 
 
@@ -797,10 +800,10 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
      *
      * @return
      */
-    public Automaton eliminateEpsilons() {
+    public BasicAutomaton eliminateEpsilons() {
 
         if (edgeSet().stream().filter(e -> e.isEpsilon()).count() == 0) {
-            return new Automaton(this);
+            return new BasicAutomaton(this);
         }
 
         Map<State, Set<State>> emap = getEpsilonClosure();
@@ -851,7 +854,7 @@ public class Automaton extends DirectedPseudograph<State, Transition> {
         }
 
 
-        Automaton a = new Automaton(start, ntrans);
+        BasicAutomaton a = new BasicAutomaton(start, ntrans);
 
 
         Set<State> accepts = a.getAcceptStates().stream().filter(v -> a
