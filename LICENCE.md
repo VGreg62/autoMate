@@ -1,13 +1,6 @@
-# autoMate
-autoMate is an automaton and/or string processing library similar to 
-the [dk.brics][http://www.brics.dk/automaton/] library. However,
-as opposed to the latter, the main focus lies on extensibility. 
-
-# Licence
-
 The MIT License (MIT)
 
-Copyright (c) 2017 Julian Thome <julian.thome.de@gmail.com>
+Copyright (c) 2016 Julian Thome <julian.thome.de@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
