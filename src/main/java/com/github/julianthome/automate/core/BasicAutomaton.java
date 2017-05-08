@@ -21,40 +21,28 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
     protected int snum = 0;
 
+    protected AutomatonProvider provider = null;
+
     public BasicAutomaton() {
-        this(false);
+        this(false, BasicAutomatonFactory.getInstance());
+        assert provider != null;
+    }
+
+    public BasicAutomaton(AutomatonProvider provider) {
+        this(false, provider);
     }
 
     public BasicAutomaton(boolean acceptsEmptyString) {
+        this(acceptsEmptyString, BasicAutomatonFactory.getInstance());
+    }
+
+    public BasicAutomaton(boolean acceptsEmptyString, AutomatonProvider
+            provider) {
         super(Transition.class);
         start = createNewState((acceptsEmptyString ? State.Kind.ACCEPT :
                 State.Kind.NORMAL));
         addVertex(start);
-    }
-
-    protected BasicAutomaton getNewAutomaton() {
-        return new BasicAutomaton();
-    }
-
-    protected BasicAutomaton getNewAutomaton(BasicAutomaton a) {
-        return new BasicAutomaton(a);
-    }
-
-    protected State createNewState(State.Kind kind) {
-        return new State(kind, snum++);
-    }
-
-    protected State createNewState(State other) {
-        return createNewState(other.getKind());
-    }
-
-    protected State createNewState(State.Kind kind, Collection<State> other) {
-        return createNewState(kind);
-    }
-
-
-    public boolean isEmpty() {
-        return vertexSet().size() == 1 && edgeSet().size() == 0;
+        this.provider = provider;
     }
 
     public BasicAutomaton(BasicAutomaton a) {
@@ -83,9 +71,12 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
         assert a.start != null;
         snum = a.snum;
+
+        this.provider = a.provider;
     }
 
-    private BasicAutomaton(State start, Collection<Transition> t) {
+    private BasicAutomaton(State start, Collection<Transition> t,
+                           AutomatonProvider provider) {
         super(Transition.class);
 
         Map<State, State> smap = new HashMap<>();
@@ -106,6 +97,27 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         }
 
     }
+
+
+
+    protected State createNewState(State.Kind kind) {
+        return new State(kind, snum++);
+    }
+
+    protected State createNewState(State other) {
+        return createNewState(other.getKind());
+    }
+
+    protected State createNewState(State.Kind kind, Collection<State> other) {
+        return createNewState(kind);
+    }
+
+
+    public boolean isEmpty() {
+        return vertexSet().size() == 1 && edgeSet().size() == 0;
+    }
+
+
 
     public boolean addTransition(Transition trans) {
         return addEdge(trans.getSource(), trans.getTarget(), trans);
@@ -178,7 +190,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     }
 
     public BasicAutomaton expand() {
-        BasicAutomaton cp = getNewAutomaton(this);
+        BasicAutomaton cp = provider.getNewAutomaton(this);
         cp.addVirtualEnd();
         return cp;
     }
@@ -214,8 +226,8 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
             return new BasicAutomaton(this);
         }
 
-        BasicAutomaton first = getNewAutomaton(this);
-        BasicAutomaton snd = getNewAutomaton(b);
+        BasicAutomaton first = provider.getNewAutomaton(this);
+        BasicAutomaton snd = provider.getNewAutomaton(b);
 
         State end = first.addVirtualEnd();
         LOGGER.debug("ffst");
@@ -244,7 +256,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     public BasicAutomaton intersect(BasicAutomaton a) {
 
 
-        BasicAutomaton ret = getNewAutomaton();
+        BasicAutomaton ret = provider.getNewAutomaton();
 
         LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
 
@@ -301,7 +313,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     public BasicAutomaton union(BasicAutomaton other) {
 
 
-        BasicAutomaton ret = getNewAutomaton();
+        BasicAutomaton ret = provider.getNewAutomaton();
         Map<State, State> smap1 = new HashMap<>();
         Map<State, State> smap2 = new HashMap<>();
 
@@ -676,7 +688,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
         LOGGER.debug(this.toDot());
 
-        BasicAutomaton dfa = getNewAutomaton();
+        BasicAutomaton dfa = provider.getNewAutomaton();
 
         LOGGER.debug(this.toDot());
 
@@ -808,8 +820,10 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
     public BasicAutomaton append(TransitionLabel r) {
 
-        BasicAutomaton a = getNewAutomaton(this);
+        assert this.provider != null;
+        BasicAutomaton a = provider.getNewAutomaton(this);
         assert a.start != null;
+        assert a.provider != null;
 
 
         LOGGER.debug("vs {}", a.vertexSet().size());
@@ -838,6 +852,8 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
                     ()));
 
         }
+
+        assert a.provider != null;
         return a.postProcess();
     }
 
@@ -938,7 +954,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         }
 
 
-        BasicAutomaton a = new BasicAutomaton(start, ntrans);
+        BasicAutomaton a = new BasicAutomaton(start, ntrans, this.provider);
 
 
         Set<State> accepts = a.getAcceptStates().stream().filter(v -> a

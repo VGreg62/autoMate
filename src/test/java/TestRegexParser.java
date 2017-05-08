@@ -32,15 +32,28 @@ public class TestRegexParser {
 
     @Test
     public void testPattern0() {
-
         BasicAutomaton a = RegexParser.INSTANCE.getAutomaton("abc*[a-z]?d");
+        Assert.assertTrue(a.match("abd"));
+        Assert.assertTrue(a.match("abcccccccccd"));
+        Assert.assertTrue(a.match("abccccccccczd"));
+        Assert.assertFalse(a.match(""));
+        Assert.assertFalse(a.match("abczzd"));
+    }
+
+
+    @Test
+    public void testPattern1() {
+
+        BasicAutomaton a = RegexParser.INSTANCE.getAutomaton(".*");
 
         Assert.assertTrue(a.match("abd"));
         Assert.assertTrue(a.match("abcccccccccd"));
         Assert.assertTrue(a.match("abccccccccczd"));
 
-        Assert.assertFalse(a.match(""));
-        Assert.assertFalse(a.match("abczzd"));
+        Assert.assertTrue(a.match(""));
+        Assert.assertTrue(a.match("abczzd"));
+        Assert.assertTrue(a.match("afdasdkjf2123u-13.4nj;af0391h41;jac " +
+                "afjasdpifw"));
 
     }
 

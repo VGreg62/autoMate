@@ -261,9 +261,29 @@ public class CharRange implements TransitionLabel{
         if(isSingleton()) {
             return Character.toString(this.min);
         } else {
-            String out = "[" + min + "-" + max +"]";
+            String out = "[" + getCharString(min) + "-" + getCharString(max)
+                    +"]";
             return EscapeUtils.escapeSpecialCharacters(out);
         }
+    }
+
+    static String getCharString(char c) {
+        StringBuilder b = new StringBuilder();
+        if (c >= 0x21 && c <= 0x7e && c != '\\' && c != '"')
+            b.append(c);
+        else {
+            b.append("\\u");
+            String s = Integer.toHexString(c);
+            if (c < 0x10)
+                b.append("000").append(s);
+            else if (c < 0x100)
+                b.append("00").append(s);
+            else if (c < 0x1000)
+                b.append("0").append(s);
+            else
+                b.append(s);
+        }
+        return b.toString();
     }
 
     @Override

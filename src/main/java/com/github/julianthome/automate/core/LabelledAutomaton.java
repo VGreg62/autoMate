@@ -8,20 +8,26 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by julian on 07/05/2017.
- */
+
 public class LabelledAutomaton extends BasicAutomaton {
 
 
     final static Logger LOGGER = LoggerFactory.getLogger(LabelledAutomaton.class);
 
-    public LabelledAutomaton(BasicAutomaton a) {
-        super(a);
-    }
 
     public LabelledAutomaton() {
-        super();
+        super(false, LabelledAutomatonFactory.getInstance());
+    }
+
+
+    public LabelledAutomaton(boolean acceptsEmptyString) {
+        super(acceptsEmptyString, LabelledAutomatonFactory.getInstance());
+    }
+
+
+
+    public LabelledAutomaton(LabelledAutomaton l) {
+        super(l);
     }
 
     @Override
@@ -44,19 +50,7 @@ public class LabelledAutomaton extends BasicAutomaton {
         return ls;
     }
 
-    @Override
-    protected BasicAutomaton getNewAutomaton() {
-        return new LabelledAutomaton();
-    }
 
-    @Override
-    protected BasicAutomaton getNewAutomaton(BasicAutomaton a) {
-        if(a instanceof LabelledAutomaton) {
-            LOGGER.debug("new labelled auto");
-            return new LabelledAutomaton(a);
-        }
-        return super.getNewAutomaton(a);
-    }
 
     private Set<String> collectLabels(Collection<State> other){
 
