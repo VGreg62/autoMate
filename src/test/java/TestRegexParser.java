@@ -19,6 +19,7 @@
 
 import com.github.julianthome.automate.core.BasicAutomaton;
 import com.github.julianthome.automate.parser.RegexParser;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,12 @@ public class TestRegexParser {
 
         BasicAutomaton a = RegexParser.INSTANCE.getAutomaton("abc*[a-z]?d");
 
+        Assert.assertTrue(a.match("abd"));
+        Assert.assertTrue(a.match("abcccccccccd"));
+        Assert.assertTrue(a.match("abccccccccczd"));
 
-
-        LOGGER.debug(a.toDot());
-
-
+        Assert.assertFalse(a.match(""));
+        Assert.assertFalse(a.match("abczzd"));
 
     }
 

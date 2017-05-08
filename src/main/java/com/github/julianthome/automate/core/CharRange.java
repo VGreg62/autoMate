@@ -190,6 +190,7 @@ public class CharRange implements TransitionLabel{
     @Override
     public int compareTo(TransitionLabel lbl) {
 
+        LOGGER.debug("lbl {} vs {}", this, lbl);
         if(lbl instanceof Epsilon)
             return 1;
 
@@ -200,14 +201,15 @@ public class CharRange implements TransitionLabel{
             if(equals(cr))
                 return 0;
 
-            if(min > cr.max)
-                return 1;
-            if(max < cr.min)
+            if(min < cr.min)
                 return -1;
             if(min > cr.min)
                 return 1;
-            if(min < cr.min)
+            if(max > cr.max)
                 return -1;
+            if(max < cr.min)
+                return 1;
+
         }
 
         assert false;

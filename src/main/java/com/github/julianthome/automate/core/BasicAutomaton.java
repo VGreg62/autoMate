@@ -237,7 +237,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         if (rmaccept)
             end.setKind(State.Kind.NORMAL);
 
-        return first.determinize();
+        return first.postProcess();
     }
 
 
@@ -295,7 +295,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         }
 
 
-        return ret;
+        return ret.postProcess();
     }
 
     public BasicAutomaton union(BasicAutomaton other) {
@@ -340,7 +340,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         LOGGER.debug("UNION");
         //return ret;
 
-        return ret.determinize();
+        return ret.postProcess();
     }
 
 
@@ -373,7 +373,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         for (State a : opt.getAcceptStates()) {
             opt.addTransition(new Transition(a, opt.start));
         }
-        return opt.determinize();
+        return opt.postProcess();
     }
 
     public BasicAutomaton repeat(int min, int max) {
@@ -393,7 +393,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
             tauto = tauto.concat(pat, false);
         }
 
-        return tauto.determinize();
+        return tauto.postProcess();
     }
 
     public BasicAutomaton plus() {
@@ -448,6 +448,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     }
 
     public void checkTransitions() {
+
         for(State s : vertexSet()) {
             checkForRedundatTransitions(s);
         }
@@ -493,6 +494,13 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         addTransitions(toAdd);
     }
 
+
+    private BasicAutomaton postProcess() {
+        BasicAutomaton a = determinize();
+        a.minimize();
+        a.checkTransitions();
+        return a.determinize();
+    }
 
 
     private Set<Transition> getSortedTransitions(State s) {
@@ -830,9 +838,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
                     ()));
 
         }
-
-        //return a;
-        return a.determinize();
+        return a.postProcess();
     }
 
     private void _computeEpsilonClosureForState(State s, Map<State, Set<State>> emap) {
@@ -951,7 +957,6 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
             a.merge(first, s);
         }
 
-        a.minimize();
         return a;
     }
 

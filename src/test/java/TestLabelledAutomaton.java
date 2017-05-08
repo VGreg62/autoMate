@@ -28,12 +28,24 @@ public class TestLabelledAutomaton {
         a2 = (LabelledAutomaton)a2.append('z');
         a2.labelAllStates("a2");
 
+
+        LabelledAutomaton a3 = new LabelledAutomaton();
+        a3 = (LabelledAutomaton)a3.append('b');
+        a3 = (LabelledAutomaton)a3.append('z');
+        a3 = (LabelledAutomaton)a3.append('z');
+        a3.labelAllStates("a3");
+
+
+
+
+
         LOGGER.debug(a2.toDot());
 
 
 
-        BasicAutomaton a = a1.union(a2);
+        BasicAutomaton a = a1.union(a2).union(a3);
 
+        a.minimize();
         LOGGER.debug(a.toDot());
     }
 
