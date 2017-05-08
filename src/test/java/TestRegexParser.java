@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 
 public class TestRegexParser {
 
@@ -55,6 +57,35 @@ public class TestRegexParser {
         Assert.assertTrue(a.match("afdasdkjf2123u-13.4nj;af0391h41;jac " +
                 "afjasdpifw"));
 
+    }
+
+
+    @Test
+    public void testPattern2() {
+
+        BasicAutomaton a = RegexParser.INSTANCE.getAutomaton
+                ("[3-9][0-9]|2[2-9]|[1-9][0-9]{2,}");
+
+        Random rn = new Random();
+
+        int x = 22;
+
+        Assert.assertTrue(a.match(String.valueOf(x)));
+        
+        for(int i = 0; i < 100; i++) {
+
+            int answer = 22 + rn.nextInt(1000);
+
+            LOGGER.debug("test with {}", answer);
+
+            Assert.assertTrue(a.match(String.valueOf(answer)));
+        }
+
+        for(int i = 0; i < x; i ++) {
+            Assert.assertFalse(a.match(String.valueOf(i)));
+        }
+
+        LOGGER.debug(a.toDot());
     }
 
 }

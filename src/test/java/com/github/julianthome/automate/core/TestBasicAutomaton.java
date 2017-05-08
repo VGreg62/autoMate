@@ -1,4 +1,5 @@
-import com.github.julianthome.automate.core.BasicAutomaton;
+package com.github.julianthome.automate.core;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

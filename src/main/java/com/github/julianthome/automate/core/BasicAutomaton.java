@@ -23,20 +23,20 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
     protected AutomatonProvider provider = null;
 
-    public BasicAutomaton() {
+    protected BasicAutomaton() {
         this(false, BasicAutomatonFactory.getInstance());
         assert provider != null;
     }
 
-    public BasicAutomaton(AutomatonProvider provider) {
+    protected BasicAutomaton(AutomatonProvider provider) {
         this(false, provider);
     }
 
-    public BasicAutomaton(boolean acceptsEmptyString) {
+    protected BasicAutomaton(boolean acceptsEmptyString) {
         this(acceptsEmptyString, BasicAutomatonFactory.getInstance());
     }
 
-    public BasicAutomaton(boolean acceptsEmptyString, AutomatonProvider
+    protected BasicAutomaton(boolean acceptsEmptyString, AutomatonProvider
             provider) {
         super(Transition.class);
         start = createNewState((acceptsEmptyString ? State.Kind.ACCEPT :
@@ -45,7 +45,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         this.provider = provider;
     }
 
-    public BasicAutomaton(BasicAutomaton a) {
+    protected BasicAutomaton(BasicAutomaton a) {
         super(Transition.class);
 
         Map<State, State> smap = new HashMap<>();
@@ -388,10 +388,45 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         return opt.postProcess();
     }
 
+    public BasicAutomaton repeatMin(int min) {
+
+        BasicAutomaton pat = provider.getNewAutomaton(this);
+        BasicAutomaton tauto = provider.getNewAutomaton();
+
+        if (min == 0) {
+            tauto = pat.optional();
+        }
+
+        for (int i = 0; i < min; i++) {
+            tauto = tauto.concat(pat);
+        }
+
+
+        return tauto.concat(pat.star()).postProcess();
+    }
+
+    public BasicAutomaton repeatMax(int max) {
+
+        BasicAutomaton pat = provider.getNewAutomaton(this);
+        BasicAutomaton tauto = provider.getNewAutomaton();
+
+        if (max == 0) {
+            BasicAutomaton b = provider.getNewAutomaton();
+            b.start.setKind(State.Kind.NORMAL);
+        }
+
+        for (int i = 0; i < max; i++) {
+            tauto = tauto.concat(pat, false);
+        }
+
+        return tauto.postProcess();
+
+    }
+
     public BasicAutomaton repeat(int min, int max) {
 
-        BasicAutomaton pat = new BasicAutomaton(this);
-        BasicAutomaton tauto = new BasicAutomaton();
+        BasicAutomaton pat = provider.getNewAutomaton(this);
+        BasicAutomaton tauto = provider.getNewAutomaton();
 
         if (min == 0) {
             tauto = pat.optional();

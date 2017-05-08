@@ -23,7 +23,7 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
     private AutomatonProvider provider = null;
 
     public RegexAstProcessor(Ast ast) {
-       this(ast, BasicAutomatonFactory.getInstance());
+        this(ast, BasicAutomatonFactory.getInstance());
     }
 
     public RegexAstProcessor(Ast ast, AutomatonProvider provider) {
@@ -43,21 +43,48 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
 
     }
 
+    private BasicAutomaton concatChildren(AstNode n) {
+        LOGGER.debug("expr");
+        BasicAutomaton cc = null;
+        for (AstNode c : n.getChildren()) {
+            if (cc == null) {
+                cc = smap.get(c);
+                continue;
+            }
+            cc = cc.concat(smap.get(c));
+        }
+        return cc;
+    }
+
+    private BasicAutomaton unifyChildren(AstNode n) {
+        LOGGER.debug("expr");
+        BasicAutomaton cc = null;
+        for (AstNode c : n.getChildren()) {
+            if (cc == null) {
+                cc = smap.get(c);
+                continue;
+            }
+            cc = cc.union(smap.get(c));
+        }
+        return cc;
+    }
+
     @Override
-    protected void process(AstNode n) {
+    protected void process(AstNode n) throws ParserException {
 
         switch (n.getRule()) {
 
             case "atom":
                 LOGGER.debug("atom {}", n.getLabel());
-                if(!n.hasChildren()) {
-                    if(n.getLabel().equals(".")) {
+                if (!n.hasChildren()) {
+                    if (n.getLabel().equals(".")) {
 
                         LOGGER.debug("basic");
                         BasicAutomaton a = provider.getAnyAccepting();
                         smap.put(n, a);
                     }
                 } else {
+                    assert n.getChildren().size() == 1;
                     simpleProp(n);
                 }
 
@@ -68,9 +95,13 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
             case "shared_literal":
             case "cc_literal":
             case "alternation":
-                simpleProp(n);
+                if(n.getChildren().size() > 1) {
+                    smap.put(n, unifyChildren(n));
+                } else {
+                    assert n.getChildren().size() == 1;
+                    simpleProp(n);
+                }
                 break;
-
             case "letter":
             case "digit":
                 BasicAutomaton a = provider.getNewAutomaton();
@@ -82,8 +113,20 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
                 String lbl = n.getLabel();
                 LOGGER.debug("cc atom {}", lbl);
 
-                if(lbl.length() == 3) {
+                if (lbl.length() == 3) {
                     BasicAutomaton na = provider.getNewAutomaton();
+
+
+                    char min = lbl.charAt(0);
+                    char max = lbl.charAt(2);
+
+                    LOGGER.debug("min {} max {}", min, max);
+
+                    if (min > max) {
+                        throw new ParserException("malformed range:" + n
+                                .getLabel());
+                    }
+
                     na = na.append(lbl.charAt(0), lbl.charAt(2));
                     smap.put(n, na);
                 } else {
@@ -98,11 +141,11 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
 
                 BasicAutomaton na = null;
 
-                if(n.getChildren().size() > 1) {
+                if (n.getChildren().size() > 1) {
 
-                    for(AstNode c : n.getChildren()) {
+                    for (AstNode c : n.getChildren()) {
 
-                        if(na == null) {
+                        if (na == null) {
                             na = smap.get(c);
                             continue;
                         }
@@ -113,22 +156,19 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
                     assert na != null;
                     LOGGER.debug("NA");
                     LOGGER.debug(na.toDot());
-                    smap.put(n,na);
+                    smap.put(n, na);
                 } else {
                     simpleProp(n);
                 }
 
             case "expr":
-                BasicAutomaton cc = null;
-                for(AstNode c : n.getChildren()) {
-                    if(cc == null) {
-                        cc = smap.get(c);
-                        continue;
-                    }
-                    cc = cc.concat(smap.get(c));
+                if(n.getChildren().size() > 1) {
+                    smap.put(n, concatChildren(n));
+                } else {
+                    assert n.getChildren().size() == 1;
+                    simpleProp(n);
                 }
-                smap.put(n, cc);
-
+                break;
             case "element":
 
                 LOGGER.debug("handle element " + n.getLabel());
@@ -148,38 +188,64 @@ public class RegexAstProcessor extends AstProcessor<BasicAutomaton, BasicAutomat
 
                     assert fauto != null;
 
+                    Pattern pattern = Pattern.compile("\\{([0-9]*),?([0-9]*)\\}");
+                    Matcher matcher = pattern.matcher(quant);
 
-                    if (last != null && last.getRule().equals("quantifier")) {
 
-                        switch (quant) {
-                            case "*":
-                                smap.put(n, fauto.star());
-                                break;
-                            case "+":
-                                smap.put(n, fauto.plus());
-                                break;
-                            case "?":
-                                smap.put(n, fauto.optional());
-                                break;
-                        }
+                    if (last != null &&
+                            last.getRule().equals("quantifier")) {
 
-                        int min = -1;
-                        int max = -1;
+                        if (quant.matches("(\\*|\\+|\\?)")) {
+                            switch (quant) {
+                                case "*":
+                                    smap.put(n, fauto.star());
+                                    break;
+                                case "+":
+                                    smap.put(n, fauto.plus());
+                                    break;
+                                case "?":
+                                    smap.put(n, fauto.optional());
+                                    break;
+                            }
+                        } else if (matcher.matches()) {
 
-                        Pattern pattern = Pattern.compile("\\{([0-9]*),?([0-9]*)\\}");
-                        Matcher matcher = pattern.matcher(quant);
+                            int min = -1;
+                            int max = -1;
 
-                        if (matcher.matches()) {
-                            if (matcher.group(1) != null) {
+                            boolean nomin = false;
+                            boolean nomax = false;
+
+                            if (matcher.group(1) != null && !matcher.group(1)
+                                    .isEmpty()) {
                                 min = Integer.parseInt(matcher.group(1));
-                            }
-                            if (matcher.group(2) != null) {
-                                max = Integer.parseInt(matcher.group(2));
+                            } else {
+                                nomin = true;
                             }
 
-                            smap.put(n, fauto.repeat(min, max));
+
+                            if (matcher.group(2) != null && !matcher.group(2)
+                                    .isEmpty()) {
+                                max = Integer.parseInt(matcher.group(2));
+                            } else {
+                                nomax = true;
+                            }
+
+                            if(nomin && nomax) {
+                                throw new ParserException("malformed " +
+                                        "quantifier: " + quant);
+                            } else if (nomin) {
+                                smap.put(n, fauto.repeatMax(max));
+                            } else if (nomax) {
+                                LOGGER.debug("nomax {}", min);
+                                smap.put(n, fauto.repeatMin(min));
+                            } else {
+                                smap.put(n, fauto.repeat(min, max));
+                            }
 
                             LOGGER.info("min " + min + " max" + max);
+                        } else {
+                            throw new ParserException("malformed quantifier: " +
+                                    "" + quant);
                         }
                     }
                 }
