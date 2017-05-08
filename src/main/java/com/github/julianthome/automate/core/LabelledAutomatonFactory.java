@@ -45,4 +45,9 @@ public class LabelledAutomatonFactory implements
     public LabelledAutomaton getNewAutomaton(LabelledAutomaton a) {
         return new LabelledAutomaton(a);
     }
+
+    @Override
+    public LabelledAutomaton getEmtpyAutomaton() {
+        return new LabelledAutomaton(true);
+    }
 }

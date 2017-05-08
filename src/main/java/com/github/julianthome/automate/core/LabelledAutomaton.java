@@ -3,41 +3,55 @@ package com.github.julianthome.automate.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class LabelledAutomaton extends BasicAutomaton {
+public class LabelledAutomaton extends Automaton {
 
 
     final static Logger LOGGER = LoggerFactory.getLogger(LabelledAutomaton.class);
 
-
-    public LabelledAutomaton() {
-        super(false, LabelledAutomatonFactory.getInstance());
+    protected LabelledAutomaton() {
+        super(false);
     }
 
-
-    public LabelledAutomaton(boolean acceptsEmptyString) {
-        super(acceptsEmptyString, LabelledAutomatonFactory.getInstance());
+    public LabelledAutomaton(LabelledAutomaton a) {
+        super(a);
     }
 
-
-
-    public LabelledAutomaton(LabelledAutomaton l) {
-        super(l);
+    public LabelledAutomaton(State start, Collection<Transition> t) {
+        super(start,t);
     }
 
+    protected LabelledAutomaton(boolean acceptsEmptyString) {
+        super(acceptsEmptyString);
+    }
     @Override
     protected State createNewState(State.Kind kind) {
         return new LabelledState(kind, super.snum++);
     }
 
+
+
     @Override
-    protected State createNewState(State other) {
-        return createNewState(other.getKind(), Collections.singleton(other));
+    protected State createNewState(State ... other) {
+        LabelledState ns = (LabelledState)createNewState(Arrays.asList(other));
+
+        ns.getLabels().addAll(collectLabels(Arrays.asList(other)));
+
+        return ns;
+    }
+
+    @Override
+    protected State createNewState(Collection<State> other) {
+        boolean accept = other.stream().filter(s -> s.isAccept()).count() ==
+                other.size();
+
+        return createNewState(accept ? State.Kind.ACCEPT : State.Kind.NORMAL,
+                other);
     }
 
     @Override
@@ -50,6 +64,40 @@ public class LabelledAutomaton extends BasicAutomaton {
         return ls;
     }
 
+    @Override
+    public Automaton getAllAccepting() {
+        return LabelledAutomatonFactory.getInstance().getAllAccepting();
+    }
+
+    @Override
+    public Automaton getAnyAccepting() {
+        return LabelledAutomatonFactory.getInstance().getAnyAccepting();
+    }
+
+    @Override
+    public Automaton getNewAutomaton() {
+        return LabelledAutomatonFactory.getInstance().getNewAutomaton();
+    }
+
+    @Override
+    public Automaton getNewAutomaton(Automaton a) {
+        return new LabelledAutomaton((LabelledAutomaton)a);
+    }
+
+    @Override
+    public Automaton getEmtpyAutomaton() {
+        return LabelledAutomatonFactory.getInstance().getNewAutomaton();
+    }
+
+    @Override
+    public Automaton clone() {
+        return new LabelledAutomaton(this);
+    }
+
+    @Override
+    public Automaton getNewAutomaton(State start, Collection<Transition> t) {
+        return null;
+    }
 
 
     private Set<String> collectLabels(Collection<State> other){
@@ -105,5 +153,20 @@ public class LabelledAutomaton extends BasicAutomaton {
     }
 
 
+    @Override
+    public Automaton intersect(Automaton a) {
+
+        LabelledState tstart = (LabelledState)this.start;
+        LabelledState astart = (LabelledState)a.start;
+
+        LabelledAutomaton first = (LabelledAutomaton)super.intersect(a);
+
+        LabelledState flabel = (LabelledState)first.getStart();
+
+        flabel.getLabels().addAll(tstart.getLabels());
+        flabel.getLabels().addAll(astart.getLabels());
+
+        return first;
+    }
 
 }

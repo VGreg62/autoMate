@@ -13,6 +13,11 @@ public class LabelledState extends State {
 
     private Set<String> labels = new HashSet<>();
 
+    public LabelledState(Kind kind, int id, Set<String> labels) {
+        super(kind, id);
+        this.labels.addAll(labels);
+    }
+
     public LabelledState(Kind kind, int id) {
         super(kind, id);
     }
@@ -20,7 +25,7 @@ public class LabelledState extends State {
     @Override
     public State clone() {
         LOGGER.debug("Clone labelled");
-        return new LabelledState(this.kind,this.id);
+        return new LabelledState(this.kind,this.id, this.labels);
     }
 
     public Set<String> getLabels() {

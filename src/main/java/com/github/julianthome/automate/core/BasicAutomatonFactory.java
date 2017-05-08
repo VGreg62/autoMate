@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
  * Created by julian on 08/05/2017.
  */
 public class BasicAutomatonFactory implements
-        AutomatonProvider<BasicAutomaton> {
+        AutomatonProvider<Automaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(LabelledAutomatonFactory.class);
 
@@ -22,32 +22,34 @@ public class BasicAutomatonFactory implements
     }
 
     @Override
-    public BasicAutomaton getAllAccepting() {
-        BasicAutomaton all = new BasicAutomaton();
+    public Automaton getAllAccepting() {
+        Automaton all = new BasicAutomaton();
         all.start.setKind(State.Kind.ACCEPT);
         all.addTransition(new Transition(all.start,all.start, CharRange.ANY.clone()));
         return all;
     }
 
     @Override
-    public BasicAutomaton getAnyAccepting() {
-        BasicAutomaton any = new BasicAutomaton();
+    public Automaton getAnyAccepting() {
+        Automaton any = new BasicAutomaton();
         State acc = any.createNewState(State.Kind.ACCEPT);
         any.addTransition(new Transition(any.start, acc, CharRange.ANY.clone()));
         return any;
     }
 
     @Override
-    public BasicAutomaton getNewAutomaton() {
-        BasicAutomaton n = new BasicAutomaton();
-        assert n.provider != null;
-        return n;
+    public Automaton getNewAutomaton() {
+        return new BasicAutomaton();
     }
 
     @Override
-    public BasicAutomaton getNewAutomaton(BasicAutomaton a) {
-        BasicAutomaton n = new BasicAutomaton(a);
-        assert n.provider != null;
-        return n;
+    public Automaton getNewAutomaton(Automaton a) {
+        return new BasicAutomaton((BasicAutomaton)a);
     }
+
+    @Override
+    public Automaton getEmtpyAutomaton() {
+        return new BasicAutomaton(true);
+    }
+
 }

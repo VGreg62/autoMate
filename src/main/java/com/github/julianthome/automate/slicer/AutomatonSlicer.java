@@ -1,16 +1,16 @@
 package com.github.julianthome.automate.slicer;
 
-import com.github.julianthome.automate.core.BasicAutomaton;
+import com.github.julianthome.automate.core.Automaton;
 import com.github.julianthome.automate.core.State;
 
 import java.util.*;
 
 public abstract class AutomatonSlicer implements Slicer {
 
-    protected BasicAutomaton a = null;
+    protected Automaton a = null;
 
     public AutomatonSlicer() {}
-    public AutomatonSlicer(BasicAutomaton cn) {
+    public AutomatonSlicer(Automaton cn) {
         a = cn;
     }
 
@@ -18,7 +18,7 @@ public abstract class AutomatonSlicer implements Slicer {
     public abstract Collection<State> getNext(Collection<State> n);
 
     @Override
-    public void setNetwork(BasicAutomaton a) {
+    public void setNetwork(Automaton a) {
         this.a = a;
     }
 

@@ -36,10 +36,72 @@ public class TestLabelledAutomaton {
 
         LOGGER.debug(a2.toDot());
 
-        BasicAutomaton a = a1.union(a2).union(a3);
+        Automaton a = a1.union(a2).union(a3);
 
         a.minimize();
         LOGGER.debug(a.toDot());
+    }
+
+    @Test
+    public void testLabelledIntersection() {
+
+        // concat(c,"x")
+
+        LabelledAutomatonFactory fact = LabelledAutomatonFactory.getInstance();
+        LabelledAutomaton c = fact.getAllAccepting();
+        c.labelAllStates("c");
+
+        LabelledAutomaton x = fact.getNewAutomaton();
+        x = (LabelledAutomaton)x.append('x');
+        x.labelAllStates("x");
+
+        LabelledAutomaton a = fact.getAllAccepting();
+        a.labelAllStates("a");
+
+        LabelledAutomaton dash = fact.getNewAutomaton();
+        dash = (LabelledAutomaton)dash.append('-');
+        dash.labelAllStates("-");
+
+        LabelledAutomaton b = fact.getAllAccepting();
+        b.labelAllStates("b");
+
+
+        // len(c)
+
+        LabelledAutomaton lena = fact.getAnyAccepting();
+        lena = (LabelledAutomaton)lena.repeatMin(7);
+
+        lena.labelAllStates("lena");
+        lena.labelAllStates("7");
+
+        ((LabelledState)lena.getStart()).getLabels().add("c");
+
+
+
+        LOGGER.debug(a.toDot());
+        LOGGER.debug(lena.toDot());
+        LabelledAutomaton isectalena = (LabelledAutomaton)a.intersect(lena);
+        LOGGER.debug("LLLLENA >>");
+        LOGGER.debug(isectalena.toDot());
+
+
+//        LabelledAutomaton concat = (LabelledAutomaton)c.concat(x);
+//
+//        Assert.assertTrue(concat.match("Asterix"));
+//        Assert.assertTrue(concat.match("Idefix"));
+//        Assert.assertTrue(concat.match("Metusalix"));
+//        Assert.assertTrue(concat.match("Unix"));
+//        Assert.assertTrue(concat.match("Linux"));
+//
+//        Assert.assertFalse(concat.match("Asteri"));
+//        Assert.assertFalse(concat.match("Idefi"));
+//        Assert.assertFalse(concat.match("Metusali"));
+//        Assert.assertFalse(concat.match("Uni"));
+//        Assert.assertFalse(concat.match("Linu"));
+//
+
+
+
     }
 
 }

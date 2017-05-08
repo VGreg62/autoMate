@@ -3,9 +3,7 @@ package com.github.julianthome.automate.core;
 import java.util.Collection;
 import java.util.HashSet;
 
-/**
- * Created by julian on 30/04/2017.
- */
+
 public class Epsilon implements TransitionLabel {
 
     public Epsilon() {}

@@ -1,7 +1,7 @@
 package com.github.julianthome.automate.parser;
 
 
-import com.github.julianthome.automate.core.BasicAutomaton;
+import com.github.julianthome.automate.core.Automaton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snt.inmemantlr.GenericParser;
@@ -61,10 +61,10 @@ public enum RegexParser {
 
 
 
-    public BasicAutomaton getAutomaton(String rexp) {
+    public Automaton getAutomaton(String rexp) {
 
         RegexAstProcessor rap = null;
-        BasicAutomaton ret = null;
+        Automaton ret = null;
 
         try {
             gp.parse(rexp);
