@@ -9,25 +9,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class LabelledAutomaton extends Automaton {
+public class LabelledAutomaton extends Automaton<LabelledAutomaton>{
 
 
     final static Logger LOGGER = LoggerFactory.getLogger(LabelledAutomaton.class);
 
     protected LabelledAutomaton() {
-        super(false);
+        super(LabelledAutomatonFactory.getInstance(),false);
     }
 
     public LabelledAutomaton(LabelledAutomaton a) {
-        super(a);
+        super
+                (LabelledAutomatonFactory.getInstance(),a);
     }
 
     public LabelledAutomaton(State start, Collection<Transition> t) {
-        super(start,t);
+        super(LabelledAutomatonFactory.getInstance(),start,t);
     }
 
     protected LabelledAutomaton(boolean acceptsEmptyString) {
-        super(acceptsEmptyString);
+        super(LabelledAutomatonFactory.getInstance(),acceptsEmptyString);
     }
     @Override
     protected State createNewState(State.Kind kind) {
@@ -64,40 +65,13 @@ public class LabelledAutomaton extends Automaton {
         return ls;
     }
 
-    @Override
-    public Automaton getAllAccepting() {
-        return LabelledAutomatonFactory.getInstance().getAllAccepting();
-    }
-
-    @Override
-    public Automaton getAnyAccepting() {
-        return LabelledAutomatonFactory.getInstance().getAnyAccepting();
-    }
-
-    @Override
-    public Automaton getNewAutomaton() {
-        return LabelledAutomatonFactory.getInstance().getNewAutomaton();
-    }
-
-    @Override
-    public Automaton getNewAutomaton(Automaton a) {
-        return new LabelledAutomaton((LabelledAutomaton)a);
-    }
-
-    @Override
-    public Automaton getEmtpyAutomaton() {
-        return LabelledAutomatonFactory.getInstance().getNewAutomaton();
-    }
 
     @Override
     public Automaton clone() {
         return new LabelledAutomaton(this);
     }
 
-    @Override
-    public Automaton getNewAutomaton(State start, Collection<Transition> t) {
-        return null;
-    }
+
 
 
     private Set<String> collectLabels(Collection<State> other){
@@ -154,7 +128,7 @@ public class LabelledAutomaton extends Automaton {
 
 
     @Override
-    public Automaton intersect(Automaton a) {
+    public LabelledAutomaton intersect(LabelledAutomaton a) {
 
         LabelledState tstart = (LabelledState)this.start;
         LabelledState astart = (LabelledState)a.start;

@@ -4,6 +4,8 @@ package com.github.julianthome.automate.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 public class LabelledAutomatonFactory implements
         AutomatonProvider<LabelledAutomaton> {
 
@@ -49,5 +51,10 @@ public class LabelledAutomatonFactory implements
     @Override
     public LabelledAutomaton getEmtpyAutomaton() {
         return new LabelledAutomaton(true);
+    }
+
+    @Override
+    public LabelledAutomaton getNewAutomaton(State start, Collection<Transition> t) {
+        return new LabelledAutomaton(start,t);
     }
 }

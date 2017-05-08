@@ -3,22 +3,25 @@ package com.github.julianthome.automate.core;
 
 import java.util.*;
 
-public class BasicAutomaton extends Automaton {
+public class BasicAutomaton extends Automaton<BasicAutomaton> {
+
 
     protected BasicAutomaton() {
-        super(false);
+        super(BasicAutomatonFactory.getInstance(),
+                false);
     }
 
     public BasicAutomaton(BasicAutomaton a) {
-        super(a);
+        super(BasicAutomatonFactory
+                .getInstance(),a);
     }
 
     public BasicAutomaton(State start, Collection<Transition> t) {
-        super(start,t);
+        super(BasicAutomatonFactory.getInstance(),start,t);
     }
 
     protected BasicAutomaton(boolean acceptsEmptyString) {
-        super(acceptsEmptyString);
+        super(BasicAutomatonFactory.getInstance(),acceptsEmptyString);
     }
 
     protected State createNewState(State.Kind kind) {
@@ -42,38 +45,4 @@ public class BasicAutomaton extends Automaton {
         return createNewState(kind);
     }
 
-    @Override
-    public Automaton getAllAccepting() {
-        return BasicAutomatonFactory.getInstance().getAllAccepting();
-    }
-
-    @Override
-    public Automaton getAnyAccepting() {
-        return BasicAutomatonFactory.getInstance().getAnyAccepting();
-    }
-
-    @Override
-    public Automaton getNewAutomaton() {
-        return new BasicAutomaton();
-    }
-
-    @Override
-    public Automaton getNewAutomaton(Automaton a) {
-        return BasicAutomatonFactory.getInstance().getNewAutomaton(a);
-    }
-
-    @Override
-    public Automaton getEmtpyAutomaton() {
-        return BasicAutomatonFactory.getInstance().getEmtpyAutomaton();
-    }
-
-    @Override
-    public Automaton clone() {
-        return new BasicAutomaton(this);
-    }
-
-    @Override
-    public Automaton getNewAutomaton(State start, Collection<Transition> t) {
-        return new BasicAutomaton(start,t);
-    }
 }

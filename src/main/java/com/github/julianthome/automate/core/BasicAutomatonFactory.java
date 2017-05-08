@@ -3,11 +3,12 @@ package com.github.julianthome.automate.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 /**
  * Created by julian on 08/05/2017.
  */
-public class BasicAutomatonFactory implements
-        AutomatonProvider<Automaton> {
+public class BasicAutomatonFactory implements AutomatonProvider<BasicAutomaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(LabelledAutomatonFactory.class);
 
@@ -22,34 +23,39 @@ public class BasicAutomatonFactory implements
     }
 
     @Override
-    public Automaton getAllAccepting() {
-        Automaton all = new BasicAutomaton();
+    public BasicAutomaton getAllAccepting() {
+        BasicAutomaton all = new BasicAutomaton();
         all.start.setKind(State.Kind.ACCEPT);
         all.addTransition(new Transition(all.start,all.start, CharRange.ANY.clone()));
         return all;
     }
 
     @Override
-    public Automaton getAnyAccepting() {
-        Automaton any = new BasicAutomaton();
+    public BasicAutomaton getAnyAccepting() {
+        BasicAutomaton any = new BasicAutomaton();
         State acc = any.createNewState(State.Kind.ACCEPT);
         any.addTransition(new Transition(any.start, acc, CharRange.ANY.clone()));
         return any;
     }
 
     @Override
-    public Automaton getNewAutomaton() {
+    public BasicAutomaton getNewAutomaton() {
         return new BasicAutomaton();
     }
 
     @Override
-    public Automaton getNewAutomaton(Automaton a) {
+    public BasicAutomaton getNewAutomaton(BasicAutomaton a) {
         return new BasicAutomaton((BasicAutomaton)a);
     }
 
     @Override
-    public Automaton getEmtpyAutomaton() {
+    public BasicAutomaton getEmtpyAutomaton() {
         return new BasicAutomaton(true);
+    }
+
+    @Override
+    public BasicAutomaton getNewAutomaton(State start, Collection<Transition> t) {
+        return new BasicAutomaton(start, t);
     }
 
 }

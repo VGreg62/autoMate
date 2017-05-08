@@ -3,6 +3,7 @@ package com.github.julianthome.automate.slicer;
 
 import com.github.julianthome.automate.core.Automaton;
 import com.github.julianthome.automate.core.State;
+import com.github.julianthome.automate.core.Transition;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,7 +24,8 @@ public class AutomatonSlicerForward extends AutomatonSlicer {
     public Collection<State> getNext(Collection<State> n) {
         Set<State> ret = new HashSet();
         for(State v : n) {
-            ret.addAll(a.outgoingEdgesOf(v).stream().map(e -> e.getTarget())
+            Set<Transition> out = a.outgoingEdgesOf(v);
+            ret.addAll(out.stream().map(e -> e.getTarget())
                     .collect(Collectors.toSet()));
         }
         return ret;

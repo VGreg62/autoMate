@@ -1,12 +1,13 @@
 package com.github.julianthome.automate.core;
 
-/**
- * Created by julian on 08/05/2017.
- */
+import java.util.Collection;
+
+
 public interface AutomatonProvider<T extends Automaton> {
     T getAllAccepting();
     T getAnyAccepting();
     T getNewAutomaton();
     T getNewAutomaton(T a);
     T getEmtpyAutomaton();
+    T getNewAutomaton(State start, Collection<Transition> t);
 }

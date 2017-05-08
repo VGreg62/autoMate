@@ -2,6 +2,7 @@ package com.github.julianthome.automate.slicer;
 
 import com.github.julianthome.automate.core.Automaton;
 import com.github.julianthome.automate.core.State;
+import com.github.julianthome.automate.core.Transition;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,7 +20,8 @@ public class AutomatonSlicerBackward extends AutomatonSlicer {
     public Collection<State> getNext(Collection<State> n) {
         Set<State> ret = new HashSet();
         for(State v : n) {
-            ret.addAll(a.incomingEdgesOf(v).stream().map(e -> e.getSource())
+            Set<Transition> in  = a.incomingEdgesOf(v);
+            ret.addAll(in.stream().map(e -> e.getSource())
                     .collect(Collectors.toSet()));
         }
         return ret;

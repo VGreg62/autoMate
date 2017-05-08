@@ -12,8 +12,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public abstract class Automaton extends
-        DirectedPseudograph<State, Transition> implements AutomatonProvider<Automaton> {
+public class Automaton<T extends Automaton>
+        extends DirectedPseudograph<State, Transition> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(Automaton.class);
 
@@ -22,7 +22,10 @@ public abstract class Automaton extends
     protected int snum = 0;
 
 
-    protected Automaton(Automaton a) {
+    BasicOperations<T> dispatch = null;
+
+
+    protected Automaton(AutomatonProvider<T> provider, Automaton a) {
         super(Transition.class);
 
         Map<State, State> smap = new HashMap<>();
@@ -50,9 +53,13 @@ public abstract class Automaton extends
 
         assert a.start != null;
         snum = a.snum;
+        dispatch = BasicOperations.getInstance();
+        dispatch.init(provider);
     }
 
-    protected Automaton(State start, Collection<Transition> t) {
+    protected Automaton(AutomatonProvider<T> provider,
+                        State start,
+                        Collection<Transition> t) {
         super(Transition.class);
 
         Map<State, State> smap = new HashMap<>();
@@ -71,21 +78,24 @@ public abstract class Automaton extends
 
             addTransition(trans);
         }
-
+        dispatch = BasicOperations.getInstance();
+        dispatch.init(provider);
     }
 
-    protected Automaton(boolean acceptsEmptyString) {
+    protected Automaton(AutomatonProvider<T> provider, boolean
+            acceptsEmptyString) {
         super(Transition.class);
         start = createNewState((acceptsEmptyString ? State.Kind.ACCEPT :
                 State.Kind.NORMAL));
         addVertex(start);
+        dispatch = BasicOperations.getInstance();
+        dispatch.init(provider);
     }
 
 
     public boolean isEmpty() {
         return vertexSet().size() == 1 && edgeSet().size() == 0;
     }
-
 
 
     public boolean addTransition(Transition trans) {
@@ -114,6 +124,66 @@ public abstract class Automaton extends
     }
 
 
+    public T union(T other) {
+        return dispatch.union((T)this, other);
+    }
+
+    public T star() {
+        return dispatch.star((T)this);
+    }
+
+    public T plus() {
+        return dispatch.plus((T)this);
+    }
+
+    public T optional() {
+        return dispatch.optional((T) this);
+    }
+
+    public T repeat(int min, int max) {
+        return dispatch.repeat((T)this, min, max);
+    }
+
+    public T repeatMax(int max) {
+        return dispatch.repeatMax((T)this, max);
+    }
+
+    public T repeatMin(int min) {
+        return dispatch.repeatMin((T)this, min);
+    }
+
+    public T append(char c) {
+        return dispatch.append((T)this, c);
+    }
+
+    public T append(char min, char max) {
+        return dispatch.append((T)this, min, max);
+    }
+
+    public T append(TransitionLabel lbl) {
+        return dispatch.append((T)this, lbl);
+    }
+
+    public T concat(T other) {
+        return dispatch.concat((T) this, other);
+    }
+
+    public T concat(T other, boolean accept) {
+        return dispatch.concat((T) this, other, accept);
+    }
+
+    public T intersect(T other) {
+        return dispatch.intersect((T) this, other);
+    }
+
+    public T determinize() {
+        return dispatch.determinize((T)this);
+    }
+
+    public T expand(){
+        return dispatch.expand((T)this);
+    }
+
     private void merge(Collection<State> states) {
 
         State first = null;
@@ -129,7 +199,7 @@ public abstract class Automaton extends
         }
     }
 
-    private void merge(State a, State b) {
+    protected void merge(State a, State b) {
         assert containsVertex(a);
         assert containsVertex(b);
 
@@ -153,15 +223,9 @@ public abstract class Automaton extends
     }
 
 
-    private Set<State> getAcceptStates() {
+    protected Set<State> getAcceptStates() {
         return vertexSet().stream().filter(v -> v.isAccept()).collect
                 (Collectors.toSet());
-    }
-
-    public Automaton expand() {
-        Automaton cp = clone();
-        cp.addVirtualEnd();
-        return cp;
     }
 
     protected State addVirtualEnd() {
@@ -181,161 +245,6 @@ public abstract class Automaton extends
         return nend;
     }
 
-    public Automaton concat(Automaton b) {
-        return concat(b, true);
-    }
-
-    public Automaton concat(Automaton b, boolean rmaccept) {
-
-        if (this.isEmpty() && b.isEmpty()) {
-            return getEmtpyAutomaton();
-        } else if (this.isEmpty()) {
-            return getNewAutomaton(b);
-        } else if (b.isEmpty()) {
-            return clone();
-        }
-
-
-        Automaton first = clone();
-        Automaton snd = getNewAutomaton(b);
-
-        State end = first.addVirtualEnd();
-        LOGGER.debug("ffst");
-        LOGGER.debug(first.toDot());
-
-        Map<State, State> smap = new HashMap<>();
-
-        Set<State> vs = snd.vertexSet();
-
-        for (State s : vs) {
-            smap.put(s, first.createNewState(s));
-        }
-
-        Set<Transition> es = snd.edgeSet();
-        for (Transition t : es) {
-            first.addTransition(new Transition(smap.get(t.getSource()), smap.get(t
-                    .getTarget()), t.getLabel().clone()));
-        }
-
-        first.addTransition(new Transition(end, smap.get(snd.start)));
-
-        if (rmaccept)
-            end.setKind(State.Kind.NORMAL);
-
-        return first.postProcess();
-    }
-
-
-    public Automaton intersect(Automaton a) {
-
-        Automaton ret = getNewAutomaton();
-
-        LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
-
-        Map<State, State> smap = new HashMap<>();
-
-        smap.put(a.getStart(), ret.getStart());
-
-        worklist.add(new Tuple<>(this.start, a.start));
-
-        Set<Tuple<State, State>> visited = new HashSet<>();
-
-        while (!worklist.isEmpty()) {
-
-            Tuple<State, State> s = worklist.pop();
-
-            if (visited.contains(s)) {
-                continue;
-            }
-
-            visited.add(s);
-
-            Set<Transition> fstt = outgoingEdgesOf(s.getKey());
-
-            Set<Transition> sndt = a.outgoingEdgesOf(s.getVal());
-
-
-            for (Transition fst : fstt) {
-
-                for (Transition snd : sndt) {
-
-                    TransitionLabel lbl = fst.getLabel().isect(snd.getLabel());
-
-                    if (lbl != null) {
-
-                        if (!smap.containsKey(snd.getSource()))
-                            smap.put(snd.getSource(), ret.createNewState(snd
-                                    .getSource(), fst.getSource()));
-
-                        if (!smap.containsKey(snd.getTarget()))
-                            smap.put(snd.getTarget(), ret.createNewState(snd
-                                    .getTarget(), fst.getTarget()));
-
-
-                        ret.addTransition(new Transition(smap.get(snd.getSource()), smap.get(snd.getTarget()), lbl));
-
-                        worklist.add(new Tuple<>(fst.getTarget(), snd.getTarget()));
-                    }
-                }
-
-            }
-        }
-
-
-        return (Automaton)ret.postProcess();
-    }
-
-    public Automaton union(Automaton other) {
-
-        Automaton ret = getNewAutomaton();
-        Map<State, State> smap1 = new HashMap<>();
-        Map<State, State> smap2 = new HashMap<>();
-
-        Set<State> vs = this.vertexSet();
-        for (State s : vs) {
-            if (!smap1.containsKey(s)) {
-                smap1.put(s, ret.createNewState(s));
-            }
-        }
-
-        Set<State> os = other.vertexSet();
-        for (State s : os) {
-            if (!smap2.containsKey(s)) {
-                smap2.put(s, ret.createNewState(s));
-            }
-        }
-
-        for (Transition e : this.edgeSet()) {
-            Transition tn = new Transition(smap1.get(e.getSource()), smap1.get
-                    (e.getTarget()), e.getLabel().clone());
-            ret.addTransition(tn);
-        }
-
-        Set<Transition> ot = other.edgeSet();
-
-        for (Transition e : ot) {
-            Transition tn = new Transition(smap2.get(e.getSource()), smap2.get
-                    (e.getTarget()), e.getLabel().clone());
-            ret.addTransition(tn);
-        }
-
-
-        ret.addTransition(new Transition(ret.start, smap1.get(this.start)));
-        ret.addTransition(new Transition(ret.start, smap2.get(other.start)));
-
-        LOGGER.debug("RETT ");
-
-        LOGGER.debug(ret.toDot());
-
-        LOGGER.debug("UNION");
-        //return ret;
-
-        return ret.postProcess();
-    }
-
-
-
-
 
     private Set<State> getConnectedOutNodes(State s) {
         return outgoingEdgesOf(s).stream().map(Transition::getTarget)
@@ -353,90 +262,7 @@ public abstract class Automaton extends
     }
 
 
-    public Automaton optional() {
-        return this.union(getEmtpyAutomaton());
-    }
 
-    public Automaton star() {
-        Automaton opt = optional();
-
-        Set<State> acc = opt.getAcceptStates();
-
-        for (State a : acc) {
-            opt.addTransition(new Transition(a, opt.start));
-        }
-        return opt.postProcess();
-    }
-
-    public Automaton repeatMin(int min) {
-
-        Automaton pat = clone();
-        Automaton tauto = getNewAutomaton();
-
-        if (min == 0) {
-            tauto = pat.optional();
-        }
-
-        for (int i = 0; i < min; i++) {
-            tauto = tauto.concat(pat);
-        }
-
-
-        return tauto.concat(pat.star()).postProcess();
-    }
-
-    public Automaton repeatMax(int max) {
-
-        Automaton pat = clone();
-        Automaton tauto = getNewAutomaton();
-
-        if (max == 0) {
-            Automaton b = getNewAutomaton();
-            b.start.setKind(State.Kind.NORMAL);
-        }
-
-        for (int i = 0; i < max; i++) {
-            tauto = tauto.concat(pat, false);
-        }
-
-        return tauto.postProcess();
-
-    }
-
-    public Automaton repeat(int min, int max) {
-
-        Automaton pat = clone();
-        Automaton tauto = getNewAutomaton();
-
-        if (min == 0) {
-            tauto = pat.optional();
-        }
-
-        for (int i = 0; i < min; i++) {
-            tauto = tauto.concat(pat);
-        }
-
-        for (int i = 0; i < max - min; i++) {
-            tauto = tauto.concat(pat, false);
-        }
-
-        return tauto.postProcess();
-    }
-
-    public Automaton plus() {
-        Automaton pat = clone();
-        return pat.concat(pat.star(), false);
-    }
-
-    public Automaton append(char c) {
-        LOGGER.debug("append 1");
-        return append(new CharRange(c, c));
-    }
-
-    public Automaton append(char min, char max) {
-        LOGGER.debug("append 2");
-        return append(new CharRange(min, max));
-    }
 
     public Automaton complement() {
         // @TODO implement
@@ -475,7 +301,6 @@ public abstract class Automaton extends
     }
 
     public void checkTransitions() {
-
         for(State s : vertexSet()) {
             checkForRedundatTransitions(s);
         }
@@ -483,7 +308,6 @@ public abstract class Automaton extends
 
 
     private void checkForRedundatTransitions(State s) {
-
 
         Set<Transition> toAdd = new HashSet<>();
         Set<Transition> toRm = new HashSet<>();
@@ -522,12 +346,6 @@ public abstract class Automaton extends
     }
 
 
-    protected Automaton postProcess() {
-        Automaton a = determinize();
-        a.minimize();
-        a.checkTransitions();
-        return a.determinize();
-    }
 
 
     private Set<Transition> getSortedTransitions(State s) {
@@ -694,101 +512,8 @@ public abstract class Automaton extends
     }
 
 
-    /**
-     * generate DFA from NFA by means of subset construction
-     *
-     * @return
-     */
-    public Automaton determinize() {
 
-        LOGGER.debug(this.toDot());
-
-        Automaton dfa = getNewAutomaton();
-
-        LOGGER.debug(this.toDot());
-
-        Map<State, Set<State>> eclosure = getEpsilonClosure();
-
-        LOGGER.debug("determinze");
-        LOGGER.debug("E-closure {}", eclosure);
-
-        Map<Set<State>, State> nstat = new HashMap<>();
-
-        nstat.put(eclosure.get(start), dfa.start);
-
-        if (eclosure.get(start).stream().anyMatch(s -> s.isAccept())) {
-            dfa.start.setKind(State.Kind.ACCEPT);
-        }
-
-        _determinize(eclosure.get(start), new HashSet<>(), nstat,
-                getEpsilonClosure(),
-                this,
-                dfa);
-
-        return dfa;
-
-    }
-
-
-    private void _determinize(Set<State> vdfastate,
-                                     Set<Set<State>> visited,
-                                     Map<Set<State>, State> nstat,
-                                     Map<State, Set<State>> eclosure,
-                                     Automaton nfa,
-                                     Automaton dfa) {
-
-
-
-        if (visited.contains(vdfastate))
-            return;
-
-        visited.add(vdfastate);
-
-        Set<State> vdfaclosure = vdfastate
-                .stream()
-                .map(v -> eclosure.get(v))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-
-        // get transition map for old automaton
-        Map<TransitionLabel, Set<State>> m = nfa.getCombinedTransitionMap(vdfaclosure, t -> !t.isEpsilon());
-
-        LOGGER.debug("%%%");
-        LOGGER.debug("VV {}", m.values());
-        // create (if necessary) corresponding states in the new automaton
-        for (Set<State> ss : m.values()) {
-
-            LOGGER.debug("T {}", ss);
-
-            State.Kind kind = ss.stream()
-                    .map(eclosure::get)
-                    .flatMap(Collection::stream)
-                    .anyMatch(e -> e.isAccept()) ? State.Kind.ACCEPT : State.Kind.NORMAL;
-
-
-            LOGGER.debug("SS {} :: {}", ss, kind);
-            if (!nstat.containsKey(ss)) {
-                nstat.put(ss, dfa.createNewState(kind, ss));
-            }
-        }
-
-
-        for (Map.Entry<TransitionLabel, Set<State>> e : m.entrySet()) {
-
-            dfa.addTransition(new Transition(nstat.get(vdfastate), nstat.get
-                    (e.getValue()), e.getKey().clone()));
-
-        }
-
-        for (Set<State> nxt : m.values()) {
-            //if(!nstat.containsKey(nxt))
-            _determinize(nxt, visited, nstat, eclosure, nfa, dfa);
-        }
-
-    }
-
-
-    private Map<TransitionLabel, Set<State>> getCombinedTransitionMap
+    protected Map<TransitionLabel, Set<State>> getCombinedTransitionMap
             (Collection<State> stats, Predicate<Transition> filter) {
 
         LOGGER.debug("get combined transition map for {}", stats);
@@ -832,42 +557,6 @@ public abstract class Automaton extends
 
 
 
-    public Automaton append(TransitionLabel r) {
-
-        Automaton a = clone();
-        assert a.start != null;;
-
-
-        LOGGER.debug("vs {}", a.vertexSet().size());
-
-        LOGGER.debug("this");
-        LOGGER.debug(this.toDot());
-        LOGGER.debug("append");
-        LOGGER.debug(a.toDot());
-
-        if (a.isEmpty()) {
-
-            LOGGER.debug("1");
-            State n = a.createNewState(State.Kind.ACCEPT);
-            LOGGER.debug("2");
-            a.addTransition(new Transition(a.start, n, r.clone()));
-
-        } else {
-
-            State vend = a.addVirtualEnd();
-
-            LOGGER.debug("vend");
-
-            LOGGER.debug(a.toDot());
-
-            a.incomingEdgesOf(vend).stream().forEach(x -> ((Transition)x)
-                    .setLabel(r.clone()));
-
-        }
-
-        return a.postProcess();
-    }
-
     private void _computeEpsilonClosureForState(State s, Map<State, Set<State>> emap) {
 
         if (!emap.containsKey(s))
@@ -894,7 +583,7 @@ public abstract class Automaton extends
         return eclosure.get(s);
     }
 
-    private Map<State, Set<State>> getEpsilonClosure() {
+    protected Map<State, Set<State>> getEpsilonClosure() {
 
         Map<State, Set<State>> eclosure = new HashMap<>();
 
@@ -906,85 +595,6 @@ public abstract class Automaton extends
     }
 
 
-    /**
-     * generate NFA from Epsilon-NFA
-     *
-     * @return
-     */
-    public Automaton eliminateEpsilons() {
-
-        if (edgeSet().stream().filter(e -> e.isEpsilon()).count() == 0) {
-            return clone();
-        }
-
-        Map<State, Set<State>> emap = getEpsilonClosure();
-
-        Collection<Transition> ntrans = new HashSet<>();
-
-        Set<State> naccept = new HashSet<>();
-
-        for (Map.Entry<State, Set<State>> cl : emap.entrySet()) {
-
-            State stat = cl.getKey();
-            Set<State> closure = cl.getValue();
-
-            for (State s : closure) {
-
-                boolean accept = closure.stream().filter(x -> x
-                        .isAccept()).count() > 0;
-
-                if (accept) {
-                    naccept.addAll(closure);
-                }
-
-                Set<Transition> trans = outgoingEdgesOf(s).stream().filter(e
-                        -> !e.isEpsilon()).collect(Collectors.toSet());
-
-
-                for (Transition t : trans) {
-
-                    Set<State> reachable = emap.get(t.getTarget());
-
-                    for (State reach : reachable) {
-                        LOGGER.debug("trans {} --> {}", s, reach);
-                        ntrans.add(new Transition(stat, reach, t.getLabel()
-                                .clone()));
-                    }
-
-                }
-            }
-
-        }
-
-        for (Transition t : ntrans) {
-            if (naccept.contains(t.getSource()))
-                t.getSource().setKind(State.Kind.ACCEPT);
-
-            if (naccept.contains(t.getTarget()))
-                t.getTarget().setKind(State.Kind.ACCEPT);
-        }
-
-        Automaton a = getNewAutomaton(start, ntrans);
-
-
-        Set<State> accepts = a.getAcceptStates().stream().filter(v -> a
-                .outgoingEdgesOf(v).size() == 0).collect(Collectors.toSet());
-
-        State first = null;
-
-        for (State s : accepts) {
-
-            LOGGER.debug("id {} {}", first, s);
-            if (first == null) {
-                first = s;
-                continue;
-            }
-
-            a.merge(first, s);
-        }
-
-        return a;
-    }
 
 
     public boolean match(String s) {
@@ -1065,23 +675,24 @@ public abstract class Automaton extends
     }
 
 
+    protected State createNewState(State.Kind kind) {
+        return new State(kind, snum++);
+    }
 
-    protected abstract State createNewState(State.Kind kind);
+    protected State createNewState(State ... other) {
+        return createNewState(Arrays.asList(other));
+    }
 
-    protected abstract State createNewState(State ... other);
+    protected State createNewState(Collection<State> other) {
 
-    protected abstract State createNewState(Collection<State> other);
+        boolean accept = other.stream().filter(s -> s.isAccept()).count() ==
+                other.size();
 
-    protected abstract State createNewState(State.Kind kind, Collection<State> other);
+        return createNewState(accept ? State.Kind.ACCEPT : State.Kind.NORMAL,
+                other);
+    }
 
-    public abstract Automaton getAllAccepting();
-    public abstract Automaton getAnyAccepting();
-    public abstract Automaton getNewAutomaton();
-    public abstract Automaton getNewAutomaton(Automaton a);
-    public abstract Automaton getEmtpyAutomaton();
-    public abstract Automaton clone();
-
-    public abstract Automaton getNewAutomaton(State start, Collection<Transition> t);
-
-
+    protected State createNewState(State.Kind kind, Collection<State> other) {
+        return createNewState(kind);
+    }
 }
