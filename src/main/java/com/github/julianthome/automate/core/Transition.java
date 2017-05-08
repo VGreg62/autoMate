@@ -7,7 +7,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by julian on 28/04/2017.
  */
-public class Transition extends DefaultEdge implements DotSerializer {
+public class Transition extends DefaultEdge implements DotSerializer,
+        Comparable<Transition> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(Transition.class);
 
@@ -107,5 +108,10 @@ public class Transition extends DefaultEdge implements DotSerializer {
 
         return src.toDot() + " -> " + tar.toDot() + "[label=\"" + lbl.toDot()
                 + "\", color=\"" + color + "\"];";
+    }
+
+    @Override
+    public int compareTo(Transition o) {
+        return lbl.compareTo(o.lbl);
     }
 }

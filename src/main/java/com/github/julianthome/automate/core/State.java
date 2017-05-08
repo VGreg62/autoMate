@@ -10,8 +10,8 @@ public class State implements DotSerializer {
         NORMAL
     }
 
-    private Kind kind;
-    private int id;
+    protected Kind kind;
+    protected int id;
 
     public State(Kind kind, int id){
         this.kind = kind;

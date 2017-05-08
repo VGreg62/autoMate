@@ -1,5 +1,8 @@
 package com.github.julianthome.automate.core;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 /**
  * Created by julian on 30/04/2017.
  */
@@ -33,12 +36,40 @@ public class Epsilon implements TransitionLabel {
     }
 
     @Override
+    public boolean isConsecutive(TransitionLabel l) {
+       return false;
+    }
+
+    @Override
+    public TransitionLabel join(TransitionLabel l) {
+        return l.clone();
+    }
+
+    @Override
     public TransitionLabel isect(TransitionLabel l) {
         return l.clone();
     }
 
+    @Override
+    public boolean contains(TransitionLabel l) {
+        return false;
+    }
+
+    @Override
+    public Collection<TransitionLabel> minus(TransitionLabel l) {
+        return new HashSet<>();
+    }
+
     public Epsilon clone() {
         return new Epsilon();
+    }
+
+    @Override
+    public int compareTo(TransitionLabel lbl) {
+
+        if(lbl instanceof Epsilon)
+            return 0;
+        else return -1;
     }
 
     @Override

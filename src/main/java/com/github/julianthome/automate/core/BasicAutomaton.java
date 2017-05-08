@@ -3,6 +3,7 @@ package com.github.julianthome.automate.core;
 import com.github.julianthome.automate.slicer.AutomatonSlicerBackward;
 import com.github.julianthome.automate.slicer.AutomatonSlicerForward;
 import com.github.julianthome.automate.utils.Tuple;
+import dk.brics.automaton.Automaton;
 import org.jgrapht.graph.DirectedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +17,9 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(BasicAutomaton.class);
 
-    private State start;
+    protected State start;
 
-    private int snum = 0;
+    protected int snum = 0;
 
     public BasicAutomaton() {
         this(false);
@@ -31,9 +32,26 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         addVertex(start);
     }
 
-    private State createNewState(State.Kind kind) {
+    protected BasicAutomaton getNewAutomaton() {
+        return new BasicAutomaton();
+    }
+
+    protected BasicAutomaton getNewAutomaton(BasicAutomaton a) {
+        return new BasicAutomaton(a);
+    }
+
+    protected State createNewState(State.Kind kind) {
         return new State(kind, snum++);
     }
+
+    protected State createNewState(State other) {
+        return createNewState(other.getKind());
+    }
+
+    protected State createNewState(State.Kind kind, Collection<State> other) {
+        return createNewState(kind);
+    }
+
 
     public boolean isEmpty() {
         return vertexSet().size() == 1 && edgeSet().size() == 0;
@@ -74,11 +92,9 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
         for (Transition trans : t) {
 
-            smap.put(trans.getSource(), createNewState(trans.getSource()
-                    .getKind()));
+            smap.put(trans.getSource(), createNewState(trans.getSource()));
 
-            smap.put(trans.getTarget(), createNewState(trans.getTarget().
-                    getKind()));
+            smap.put(trans.getTarget(), createNewState(trans.getTarget()));
 
             if (start.equals(trans.getSource()))
                 this.start = trans.getSource();
@@ -162,7 +178,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     }
 
     public BasicAutomaton expand() {
-        BasicAutomaton cp = new BasicAutomaton(this);
+        BasicAutomaton cp = getNewAutomaton(this);
         cp.addVirtualEnd();
         return cp;
     }
@@ -198,8 +214,8 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
             return new BasicAutomaton(this);
         }
 
-        BasicAutomaton first = new BasicAutomaton(this);
-        BasicAutomaton snd = new BasicAutomaton(b);
+        BasicAutomaton first = getNewAutomaton(this);
+        BasicAutomaton snd = getNewAutomaton(b);
 
         State end = first.addVirtualEnd();
         LOGGER.debug("ffst");
@@ -208,7 +224,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         Map<State, State> smap = new HashMap<>();
 
         for (State s : snd.vertexSet()) {
-            smap.put(s, first.createNewState(s.getKind()));
+            smap.put(s, first.createNewState(s));
         }
 
         for (Transition t : snd.edgeSet()) {
@@ -228,7 +244,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     public BasicAutomaton intersect(BasicAutomaton a) {
 
 
-        BasicAutomaton ret = new BasicAutomaton();
+        BasicAutomaton ret = getNewAutomaton();
 
         LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
 
@@ -261,11 +277,11 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
                         if (!smap.containsKey(snd.getSource()))
                             smap.put(snd.getSource(), ret.createNewState(snd
-                                    .getSource().getKind()));
+                                    .getSource()));
 
                         if (!smap.containsKey(snd.getTarget()))
                             smap.put(snd.getTarget(), ret.createNewState(snd
-                                    .getTarget().getKind()));
+                                    .getTarget()));
 
 
                         ret.addTransition(new Transition(smap.get(snd.getSource
@@ -284,27 +300,20 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
     public BasicAutomaton union(BasicAutomaton other) {
 
-        LOGGER.debug("union");
 
-        LOGGER.debug(this.toDot());
-        LOGGER.debug(other.toDot());
-
-        LOGGER.debug(">>> union");
-
-
-        BasicAutomaton ret = new BasicAutomaton();
+        BasicAutomaton ret = getNewAutomaton();
         Map<State, State> smap1 = new HashMap<>();
         Map<State, State> smap2 = new HashMap<>();
 
         for (State s : this.vertexSet()) {
             if (!smap1.containsKey(s)) {
-                smap1.put(s, ret.createNewState(s.getKind()));
+                smap1.put(s, ret.createNewState(s));
             }
         }
 
         for (State s : other.vertexSet()) {
             if (!smap2.containsKey(s)) {
-                smap2.put(s, ret.createNewState(s.getKind()));
+                smap2.put(s, ret.createNewState(s));
             }
         }
 
@@ -329,6 +338,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         LOGGER.debug(ret.toDot());
 
         LOGGER.debug("UNION");
+        //return ret;
 
         return ret.determinize();
     }
@@ -399,7 +409,18 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
     public BasicAutomaton append(char min, char max) {
         LOGGER.debug("append 2");
         return append(new CharRange(min, max));
+    }
 
+    public BasicAutomaton complement() {
+        // @TODO implement
+
+        return null;
+    }
+
+    public BasicAutomaton minus(Automaton other) {
+        // @TODO implement
+
+        return null;
     }
 
     private void collapseStates(Predicate<State> p) {
@@ -426,6 +447,59 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         removeAllVertices(vertices);
     }
 
+    public void checkTransitions() {
+        for(State s : vertexSet()) {
+            checkForRedundatTransitions(s);
+        }
+    }
+
+
+    private void checkForRedundatTransitions(State s) {
+
+
+        Set<Transition> toAdd = new HashSet<>();
+        Set<Transition> toRm = new HashSet<>();
+        Set<Transition> sorted = getSortedTransitions(s);
+
+        Transition prev = null;
+
+        for(Transition t : sorted) {
+
+            if(prev == null)
+                prev = t;
+
+            if(prev.getLabel().contains(t.getLabel()) && !prev.getLabel()
+                    .equals(t.getLabel())) {
+
+                Collection<TransitionLabel> lbl = prev.getLabel().minus(t
+                        .getLabel());
+
+                toAdd.add(new Transition(prev.getSource(), prev.getTarget(),
+                        t.getLabel().clone()));
+
+
+                toRm.add(prev);
+                LOGGER.debug("rm {}", prev);
+
+                for(TransitionLabel l : lbl) {
+                    toAdd.add(new Transition(prev.getSource(), prev.getTarget(), l));
+                }
+            } else {
+                prev = t;
+            }
+        }
+
+        removeAllEdges(toRm);
+        addTransitions(toAdd);
+    }
+
+
+
+    private Set<Transition> getSortedTransitions(State s) {
+        Set<Transition> sorted = new TreeSet<>();
+        sorted.addAll(outgoingEdgesOf(s));
+        return sorted;
+    }
 
 
     public void minimize() {
@@ -592,7 +666,11 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
      */
     public BasicAutomaton determinize() {
 
-        BasicAutomaton dfa = new BasicAutomaton();
+        LOGGER.debug(this.toDot());
+
+        BasicAutomaton dfa = getNewAutomaton();
+
+        LOGGER.debug(this.toDot());
 
         Map<State, Set<State>> eclosure = getEpsilonClosure();
 
@@ -603,8 +681,9 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
         nstat.put(eclosure.get(start), dfa.start);
 
-        if (eclosure.get(start).stream().anyMatch(s -> s.isAccept()))
+        if (eclosure.get(start).stream().anyMatch(s -> s.isAccept())) {
             dfa.start.setKind(State.Kind.ACCEPT);
+        }
 
         _determinize(eclosure.get(start), new HashSet<>(), nstat,
                 getEpsilonClosure(),
@@ -655,7 +734,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
             LOGGER.debug("SS {} :: {}", ss, kind);
             if (!nstat.containsKey(ss)) {
-                nstat.put(ss, dfa.createNewState(kind));
+                nstat.put(ss, dfa.createNewState(kind, ss));
             }
         }
 
@@ -715,14 +794,13 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         LOGGER.debug("MM {}", m);
 
         return m;
-
     }
 
 
 
     public BasicAutomaton append(TransitionLabel r) {
 
-        BasicAutomaton a = new BasicAutomaton(this);
+        BasicAutomaton a = getNewAutomaton(this);
         assert a.start != null;
 
 
@@ -735,7 +813,9 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
         if (a.isEmpty()) {
 
+            LOGGER.debug("1");
             State n = a.createNewState(State.Kind.ACCEPT);
+            LOGGER.debug("2");
             a.addTransition(new Transition(a.start, n, r.clone()));
 
         } else {
@@ -751,9 +831,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
         }
 
-
-
-
+        //return a;
         return a.determinize();
     }
 
@@ -907,7 +985,24 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
         }
 
         return false;
+    }
 
+
+    protected String vertexToDot(State n) {
+        String shape = "circle";
+        String color = "";
+
+        if (start.equals(n)) {
+            color = "green";
+            assert start.equals(n);
+        }
+
+        if (n.isAccept()) {
+            shape = "doublecircle";
+        }
+
+        return "\t" + n.toDot() + " [label=\"" + n.toDot() + "\"," +
+                "shape=\"" + shape + "\", color=\"" + color + "\"];\n";
     }
 
     public String toDot() {
@@ -921,20 +1016,7 @@ public class BasicAutomaton extends DirectedPseudograph<State, Transition> {
 
 
         for (State n : this.vertexSet()) {
-            String shape = "circle";
-            String color = "";
-
-            if (start.equals(n)) {
-                color = "green";
-                assert start.equals(n);
-            }
-
-            if (n.isAccept()) {
-                shape = "doublecircle";
-            }
-
-            sb.append("\t" + n.toDot() + " [label=\"" + n.toDot() + "\"," +
-                    "shape=\"" + shape + "\", color=\"" + color + "\"];\n");
+            sb.append(vertexToDot(n));
         }
 
 

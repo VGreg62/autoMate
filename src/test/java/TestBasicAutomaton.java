@@ -247,7 +247,7 @@ public class TestBasicAutomaton {
         BasicAutomaton a = new BasicAutomaton(true);
 
         BasicAutomaton a1 = new BasicAutomaton();
-        a1 = a1.append('a', 'b');
+        a1 = a1.append('a', 'e');
         a1 = a1.append('t');
         a1 = a1.append('e');
 
@@ -257,7 +257,7 @@ public class TestBasicAutomaton {
         a2 = a2.append('z');
 
         BasicAutomaton a3 = new BasicAutomaton();
-        a3 = a3.append('j');
+        a3 = a3.append('b', 'c');
         a3 = a3.append('u');
         a3 = a3.append('t');
 
@@ -274,6 +274,15 @@ public class TestBasicAutomaton {
         a5.minimize();
 
         LOGGER.debug(a5.toDot());
+
+        a5.checkTransitions();
+        LOGGER.debug(a5.toDot());
+
+        BasicAutomaton aet = a5.determinize();
+        LOGGER.debug(aet.toDot());
+
+
+
 
 
     }

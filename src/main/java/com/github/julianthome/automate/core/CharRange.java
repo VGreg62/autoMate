@@ -1,11 +1,17 @@
 package com.github.julianthome.automate.core;
 
 import com.github.julianthome.automate.utils.EscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Created by julian on 28/04/2017.
- */
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+
 public class CharRange implements TransitionLabel{
+
+    final static Logger LOGGER = LoggerFactory.getLogger(CharRange.class);
 
     public char min;
     public char max;
@@ -54,7 +60,44 @@ public class CharRange implements TransitionLabel{
     }
 
     @Override
-    public TransitionLabel isect(TransitionLabel other) {
+    public boolean isConsecutive(TransitionLabel l) {
+
+        if(l instanceof CharRange) {
+            CharRange cr = (CharRange)l;
+
+            if(isect(l) != null)
+                return true;
+
+            if(cr.max + 1 == min) {
+                return true;
+            }
+
+            if(max + 1 == cr.min) {
+                return true;
+            }
+
+        }
+        return false;
+
+    }
+
+    @Override
+    public TransitionLabel join(TransitionLabel l) {
+        if(!isConsecutive(l))
+            return null;
+
+        CharRange cr = (CharRange)l;
+
+        char min = (char)Math.min(this.min, cr.min);
+        char max = (char)Math.max(this.max, cr.max);
+
+        assert min <= max;
+
+        return new CharRange(min, max);
+    }
+
+    @Override
+    public CharRange isect(TransitionLabel other) {
         if(other instanceof Epsilon)
             return this.clone();
 
@@ -73,6 +116,68 @@ public class CharRange implements TransitionLabel{
         return null;
     }
 
+    @Override
+    public boolean contains(TransitionLabel l) {
+
+        if(l instanceof Epsilon) {
+            return false;
+        }
+
+        CharRange cr = (CharRange)l;
+
+        return min <= cr.min && max >= cr.max;
+
+    }
+
+    @Override
+    public Collection<TransitionLabel> minus(TransitionLabel l) {
+
+        Set<TransitionLabel> ret = new HashSet<>();
+
+        if(l instanceof Epsilon) {
+            ret.add(this.clone());
+        } else {
+            CharRange other = (CharRange)l;
+
+            CharRange is = null;
+
+            if ((is = isect(other)) != null) {
+
+                LOGGER.debug("is {}", is);
+                if(is.min > Character.MIN_VALUE) {
+                    CharRange mm = new CharRange(Character.MIN_VALUE, (char)
+                            (is.min-1));
+
+                    if(this.isect(mm) != null) {
+                        ret.add(this.isect(mm));
+                    }
+
+                    if(other.isect(mm) != null) {
+                        ret.add(other.isect(mm));
+                    }
+                }
+
+                if(is.max < Character.MAX_VALUE) {
+
+                    CharRange mm = new CharRange((char)(is.max+1), Character.MAX_VALUE);
+
+                    if(this.isect(mm) != null) {
+                        ret.add(this.isect(mm));
+                    }
+
+                    if(other.isect(mm) != null) {
+                        ret.add(other.isect(mm));
+                    }
+
+                }
+
+            }
+        }
+
+        return ret;
+    }
+
+
     public boolean isSingleton() {
         return this.min == this.max;
     }
@@ -80,6 +185,33 @@ public class CharRange implements TransitionLabel{
     @Override
     public CharRange clone() {
         return new CharRange(this.min, this.max);
+    }
+
+    @Override
+    public int compareTo(TransitionLabel lbl) {
+
+        if(lbl instanceof Epsilon)
+            return 1;
+
+        if(lbl instanceof CharRange) {
+
+            CharRange cr = (CharRange) lbl;
+
+            if(equals(cr))
+                return 0;
+
+            if(min > cr.max)
+                return 1;
+            if(max < cr.min)
+                return -1;
+            if(min > cr.min)
+                return 1;
+            if(min < cr.min)
+                return -1;
+        }
+
+        assert false;
+        return 0;
     }
 
     public char getMin() {
