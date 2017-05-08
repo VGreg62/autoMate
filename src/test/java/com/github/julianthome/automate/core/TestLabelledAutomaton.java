@@ -4,9 +4,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by julian on 30/04/2017.
- */
+
 public class TestLabelledAutomaton {
 
     final static Logger LOGGER = LoggerFactory.getLogger(TestLabelledAutomaton.class);
@@ -36,12 +34,7 @@ public class TestLabelledAutomaton {
         a3.labelAllStates("a3");
 
 
-
-
-
         LOGGER.debug(a2.toDot());
-
-
 
         BasicAutomaton a = a1.union(a2).union(a3);
 

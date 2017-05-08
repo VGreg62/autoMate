@@ -71,7 +71,7 @@ public class TestRegexParser {
         int x = 22;
 
         Assert.assertTrue(a.match(String.valueOf(x)));
-        
+
         for(int i = 0; i < 100; i++) {
 
             int answer = 22 + rn.nextInt(1000);
