@@ -1,91 +1,47 @@
+/**
+ * autoMate - yet another automaton library for Java
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2017 Julian Thome <julian.thome.de@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ **/
+
 package com.github.julianthome.automate.ext;
 
-import com.github.julianthome.automate.core.AutomatonInterface;
+import com.github.julianthome.automate.core.*;
 
-/**
- * Created by julian on 09/05/2017.
- */
-public class MemorizingAutomaton implements AutomatonInterface<MemorizingAutomaton> {
+import java.util.Collection;
 
+public class MemorizingAutomaton extends AbstractAutomaton<MemorizingAutomaton> {
 
 
-    @Override
-    public MemorizingAutomaton union(MemorizingAutomaton other) {
-        return null;
+    protected MemorizingAutomaton(AutomatonProvider<MemorizingAutomaton> provider, AbstractAutomaton a) {
+        super(provider, a);
     }
 
-    @Override
-    public MemorizingAutomaton star() {
-        return null;
+    protected MemorizingAutomaton(AutomatonProvider<MemorizingAutomaton> provider, State start, Collection<Transition> t) {
+        super(provider, start, t);
     }
 
-    @Override
-    public MemorizingAutomaton plus() {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton optional() {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton repeat(int min, int max) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton repeatMax(int max) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton repeatMin(int min) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton append(char c) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton append(char min, char max) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton concat(MemorizingAutomaton other) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton concat(MemorizingAutomaton other, boolean accept) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton intersect(MemorizingAutomaton other) {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton determinize() {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton expand() {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton complement() {
-        return null;
-    }
-
-    @Override
-    public MemorizingAutomaton minus(MemorizingAutomaton other) {
-        return null;
+    protected MemorizingAutomaton(AutomatonProvider<MemorizingAutomaton> provider, boolean acceptsEmptyString) {
+        super(provider, acceptsEmptyString);
     }
 }
