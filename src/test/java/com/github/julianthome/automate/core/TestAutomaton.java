@@ -8,21 +8,21 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by julian on 30/04/2017.
  */
-public class TestBasicAutomaton {
+public class TestAutomaton {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(TestBasicAutomaton.class);
+    final static Logger LOGGER = LoggerFactory.getLogger(TestAutomaton.class);
 
     private Automaton getSimpleAutomaton() {
 
-        Automaton a1 = new BasicAutomaton();
+        Automaton a1 = new Automaton();
         a1 = a1.append('a', 'b');
         a1 = a1.append('t');
         a1 = a1.append('e');
 
 
-        Automaton a2 = new BasicAutomaton();
+        Automaton a2 = new Automaton();
 
-        Automaton a3 = new BasicAutomaton();
+        Automaton a3 = new Automaton();
         a3 = a3.append('x');
         a3 = a3.append('y');
         a3 = a3.append('z');
@@ -34,7 +34,7 @@ public class TestBasicAutomaton {
 
     @Test
     public void testAppend() {
-        Automaton a = new BasicAutomaton();
+        Automaton a = new Automaton();
         a = a.append('a', 'b');
         a = a.append('g');
         a = a.append('d');
@@ -52,8 +52,8 @@ public class TestBasicAutomaton {
 
     @Test
     public void testConcat() {
-        Automaton a = new BasicAutomaton().append('h', 'z').append('e').append('l');
-        Automaton b = new BasicAutomaton().append('l').append('l').append('o');
+        Automaton a = new Automaton().append('h', 'z').append('e').append('l');
+        Automaton b = new Automaton().append('l').append('l').append('o');
         Automaton c = a.concat(b);
 
         Assert.assertFalse(c.match("gelllo"));
@@ -82,7 +82,7 @@ public class TestBasicAutomaton {
 
         Automaton a = getSimpleAutomaton();
 
-        Automaton a4 = new BasicAutomaton();
+        Automaton a4 = new Automaton();
         a4 = a4.append('x');
         a4 = a4.append('y');
         a4 = a4.append('z');
@@ -119,13 +119,13 @@ public class TestBasicAutomaton {
     @Test
     public void testOptional() {
 
-        Automaton a1 = new BasicAutomaton();
+        Automaton a1 = new Automaton();
         a1 = a1.append('a', 'b');
         a1 = a1.append('t');
         a1 = a1.append('e');
 
 
-        Automaton a2 = new BasicAutomaton();
+        Automaton a2 = new Automaton();
         a2 = a2.append('x');
         a2 = a2.append('y');
         a2 = a2.append('z');
@@ -149,13 +149,13 @@ public class TestBasicAutomaton {
     @Test
     public void testPlus() {
 
-        Automaton a1 = new BasicAutomaton();
+        Automaton a1 = new Automaton();
         a1 = a1.append('a', 'b');
         a1 = a1.append('t');
         a1 = a1.append('e');
 
 
-        Automaton a2 = new BasicAutomaton();
+        Automaton a2 = new Automaton();
         a2 = a2.append('x');
         a2 = a2.append('y');
         a2 = a2.append('z');
@@ -183,12 +183,12 @@ public class TestBasicAutomaton {
     @Test
     public void testRepeat() {
 
-        Automaton a1 = new BasicAutomaton();
+        Automaton a1 = new Automaton();
         a1 = a1.append('a', 'b');
         a1 = a1.append('t');
         a1 = a1.append('e');
 
-        Automaton a2 = new BasicAutomaton();
+        Automaton a2 = new Automaton();
         a2 = a2.append('x');
         a2 = a2.append('y');
         a2 = a2.append('z');
@@ -236,7 +236,7 @@ public class TestBasicAutomaton {
 
     @Test
     public void testEmptyString() {
-        Automaton a = new BasicAutomaton(true);
+        Automaton a = new Automaton(true);
 
         LOGGER.debug(a.toDot());
 
@@ -245,24 +245,24 @@ public class TestBasicAutomaton {
 
     @Test
     public void testMinimization() {
-        Automaton a = new BasicAutomaton(true);
+        Automaton a = new Automaton(true);
 
-        Automaton a1 = new BasicAutomaton();
+        Automaton a1 = new Automaton();
         a1 = a1.append('a', 'e');
         a1 = a1.append('t');
         a1 = a1.append('e');
 
-        Automaton a2 = new BasicAutomaton();
+        Automaton a2 = new Automaton();
         a2 = a2.append('x');
         a2 = a2.append('y');
         a2 = a2.append('z');
 
-        Automaton a3 = new BasicAutomaton();
+        Automaton a3 = new Automaton();
         a3 = a3.append('b', 'g');
         a3 = a3.append('u');
         a3 = a3.append('t');
 
-        Automaton a4 = new BasicAutomaton();
+        Automaton a4 = new Automaton();
         a4 = a4.append('x');
         a4 = a4.append('0');
         a4 = a4.append('0');
@@ -290,14 +290,14 @@ public class TestBasicAutomaton {
     public void testMatch() {
 
         BasicAutomatonFactory fact = BasicAutomatonFactory.getInstance();
-        BasicAutomaton c = fact.getAllAccepting();
+        Automaton c = fact.getAllAccepting();
 
 
-        BasicAutomaton x = fact.getNewAutomaton();
+        Automaton x = fact.getNewAutomaton();
         x = x.append('x');
 
 
-        BasicAutomaton concat = c.concat(x);
+        Automaton concat = c.concat(x);
 
         Assert.assertTrue(concat.match("Asterix"));
         Assert.assertTrue(concat.match("Idefix"));

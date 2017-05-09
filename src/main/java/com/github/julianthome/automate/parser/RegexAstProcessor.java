@@ -1,7 +1,7 @@
 package com.github.julianthome.automate.parser;
 
 import com.github.julianthome.automate.core.AutomatonProvider;
-import com.github.julianthome.automate.core.Automaton;
+import com.github.julianthome.automate.core.AbstractAutomaton;
 import com.github.julianthome.automate.core.BasicAutomatonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 /**
  * Created by julian on 28/04/2017.
  */
-public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
+public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractAutomaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(RegexParser.class);
 
@@ -32,8 +32,8 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
     }
 
     @Override
-    public Automaton getResult() {
-        Automaton a = smap.get(ast.getRoot());
+    public AbstractAutomaton getResult() {
+        AbstractAutomaton a = smap.get(ast.getRoot());
         a.minimize();
         return a;
     }
@@ -43,9 +43,9 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
 
     }
 
-    private Automaton concatChildren(AstNode n) {
+    private AbstractAutomaton concatChildren(AstNode n) {
         LOGGER.debug("expr");
-        Automaton cc = null;
+        AbstractAutomaton cc = null;
         for (AstNode c : n.getChildren()) {
             if (cc == null) {
                 cc = smap.get(c);
@@ -56,9 +56,9 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
         return cc;
     }
 
-    private Automaton unifyChildren(AstNode n) {
+    private AbstractAutomaton unifyChildren(AstNode n) {
         LOGGER.debug("expr");
-        Automaton cc = null;
+        AbstractAutomaton cc = null;
         for (AstNode c : n.getChildren()) {
             if (cc == null) {
                 cc = smap.get(c);
@@ -80,7 +80,7 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
                     if (n.getLabel().equals(".")) {
 
                         LOGGER.debug("basic");
-                        Automaton a = provider.getAnyAccepting();
+                        AbstractAutomaton a = provider.getAnyAccepting();
                         smap.put(n, a);
                     }
                 } else {
@@ -104,7 +104,7 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
                 break;
             case "letter":
             case "digit":
-                Automaton a = provider.getNewAutomaton();
+                AbstractAutomaton a = provider.getNewAutomaton();
                 a = a.append(n.getLabel().charAt(0));
                 smap.put(n, a);
                 break;
@@ -114,7 +114,7 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
                 LOGGER.debug("cc atom {}", lbl);
 
                 if (lbl.length() == 3) {
-                    Automaton na = provider.getNewAutomaton();
+                    AbstractAutomaton na = provider.getNewAutomaton();
 
 
                     char min = lbl.charAt(0);
@@ -139,7 +139,7 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
                 LOGGER.debug("character class {}", n.getLabel());
 
 
-                Automaton na = null;
+                AbstractAutomaton na = null;
 
                 if (n.getChildren().size() > 1) {
 
@@ -182,7 +182,7 @@ public class RegexAstProcessor extends AstProcessor<Automaton, Automaton> {
 
                     String quant = last.getLabel();
 
-                    Automaton fauto = smap.get(first);
+                    AbstractAutomaton fauto = smap.get(first);
 
                     LOGGER.debug("fauto {}", fauto.toDot());
 

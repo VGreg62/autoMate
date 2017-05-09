@@ -8,7 +8,7 @@ import java.util.Collection;
 /**
  * Created by julian on 08/05/2017.
  */
-public class BasicAutomatonFactory implements AutomatonProvider<BasicAutomaton> {
+public class BasicAutomatonFactory implements AutomatonProvider<Automaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(BasicAutomatonFactory.class);
 
@@ -23,39 +23,39 @@ public class BasicAutomatonFactory implements AutomatonProvider<BasicAutomaton> 
     }
 
     @Override
-    public BasicAutomaton getAllAccepting() {
-        BasicAutomaton all = new BasicAutomaton();
+    public Automaton getAllAccepting() {
+        Automaton all = new Automaton();
         all.start.setKind(State.Kind.ACCEPT);
         all.addTransition(new Transition(all.start,all.start, CharRange.ANY.clone()));
         return all;
     }
 
     @Override
-    public BasicAutomaton getAnyAccepting() {
-        BasicAutomaton any = new BasicAutomaton();
+    public Automaton getAnyAccepting() {
+        Automaton any = new Automaton();
         State acc = any.createNewState(State.Kind.ACCEPT);
         any.addTransition(new Transition(any.start, acc, CharRange.ANY.clone()));
         return any;
     }
 
     @Override
-    public BasicAutomaton getNewAutomaton() {
-        return new BasicAutomaton();
+    public Automaton getNewAutomaton() {
+        return new Automaton();
     }
 
     @Override
-    public BasicAutomaton getNewAutomaton(BasicAutomaton a) {
-        return new BasicAutomaton((BasicAutomaton)a);
+    public Automaton getNewAutomaton(Automaton a) {
+        return new Automaton((Automaton)a);
     }
 
     @Override
-    public BasicAutomaton getEmtpyAutomaton() {
-        return new BasicAutomaton(true);
+    public Automaton getEmtpyAutomaton() {
+        return new Automaton(true);
     }
 
     @Override
-    public BasicAutomaton getNewAutomaton(State start, Collection<Transition> t) {
-        return new BasicAutomaton(start, t);
+    public Automaton getNewAutomaton(State start, Collection<Transition> t) {
+        return new Automaton(start, t);
     }
 
 }

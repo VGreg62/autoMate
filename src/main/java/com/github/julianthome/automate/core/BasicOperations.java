@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class BasicOperations <T extends Automaton> {
+public class BasicOperations <T extends AbstractAutomaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(BasicOperations.class);
 
@@ -305,15 +305,13 @@ public class BasicOperations <T extends Automaton> {
     public T determinize(T fst) {
 
 
+        // split all redundant transitions
+        //fst.eliminateRedundantTransitions();
+
         LOGGER.debug(fst.toDot());
 
         T dfa = provider.getNewAutomaton();
 
-
-        // nothing to determinze
-//        if(!fst.hasAcceptStates()) {
-//            return provider.getNewAutomaton(fst);
-//        }
 
         Map<State, Set<State>> eclosure = fst.getEpsilonClosure();
 
@@ -349,8 +347,8 @@ public class BasicOperations <T extends Automaton> {
                               Set<Set<State>> visited,
                               Map<Set<State>, State> nstat,
                               Map<State, Set<State>> eclosure,
-                              Automaton nfa,
-                              Automaton dfa) {
+                              AbstractAutomaton nfa,
+                              AbstractAutomaton dfa) {
 
 
 
@@ -494,7 +492,6 @@ public class BasicOperations <T extends Automaton> {
     protected T postProcess(T fst) {
         T a = determinize(fst);
         a.minimize();
-        a.checkTransitions();
         return determinize(a);
     }
 }

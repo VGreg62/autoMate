@@ -17,7 +17,7 @@
 * limitations under the Licence.
 */
 
-import com.github.julianthome.automate.core.Automaton;
+import com.github.julianthome.automate.core.AbstractAutomaton;
 import com.github.julianthome.automate.parser.RegexParser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class TestRegexParser {
 
     @Test
     public void testPattern0() {
-        Automaton a = RegexParser.INSTANCE.getAutomaton("abc*[a-z]?d");
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("abc*[a-z]?d");
         Assert.assertTrue(a.match("abd"));
         Assert.assertTrue(a.match("abcccccccccd"));
         Assert.assertTrue(a.match("abccccccccczd"));
@@ -46,7 +46,7 @@ public class TestRegexParser {
     @Test
     public void testPattern1() {
 
-        Automaton a = RegexParser.INSTANCE.getAutomaton(".*");
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton(".*");
 
         Assert.assertTrue(a.match("abd"));
         Assert.assertTrue(a.match("abcccccccccd"));
@@ -63,7 +63,7 @@ public class TestRegexParser {
     @Test
     public void testPattern2() {
 
-        Automaton a = RegexParser.INSTANCE.getAutomaton
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton
                 ("[3-9][0-9]|2[2-9]|[1-9][0-9]{2,}");
 
         Random rn = new Random();

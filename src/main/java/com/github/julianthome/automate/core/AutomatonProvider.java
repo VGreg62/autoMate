@@ -3,7 +3,7 @@ package com.github.julianthome.automate.core;
 import java.util.Collection;
 
 
-public interface AutomatonProvider<T extends Automaton> {
+public interface AutomatonProvider<T extends AbstractAutomaton> {
     T getAllAccepting();
     T getAnyAccepting();
     T getNewAutomaton();
