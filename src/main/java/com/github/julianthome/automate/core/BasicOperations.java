@@ -385,7 +385,7 @@ public class BasicOperations <T extends AbstractAutomaton> {
         for (State p : dstate) {
             p.setKind(p.isAccept() ? State.Kind.NORMAL : State.Kind.ACCEPT);
         }
-        
+
         return postProcess(det);
     }
 

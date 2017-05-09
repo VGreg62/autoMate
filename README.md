@@ -1,7 +1,5 @@
 # autoMate
-autoMate is an automaton and/or string processing library similar to 
-the [dk.brics](http://www.brics.dk/automaton) library. However,
-as opposed to the latter, the main focus lies on extensibility. 
+autoMate is an automaton and/or string processing library for Java.
 
 # Status
 [![Build Status](https://travis-ci.org/julianthome/autoMate.svg?branch=master)](https://travis-ci.org/julianthome/autoMate.svg?branch=master)  [![codecov](https://codecov.io/gh/julianthome/autoMate/branch/master/graph/badge.svg)](https://codecov.io/gh/julianthome/autoMate)  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/autoMate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/autoMate/badge.svg)  [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.github.julianthome/autoMate/badge.svg)](http://www.javadoc.io/doc/com.github.julianthome/autoMate) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Language](http://img.shields.io/badge/language-java-brightgreen.svg)](https://www.java.com/)
