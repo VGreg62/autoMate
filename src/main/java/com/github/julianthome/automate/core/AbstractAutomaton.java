@@ -13,7 +13,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class AbstractAutomaton<T extends AbstractAutomaton>
-        extends DirectedPseudograph<State, Transition> {
+        extends DirectedPseudograph<State, Transition>
+        implements AutomatonInterface<T> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(AbstractAutomaton.class);
 
@@ -124,38 +125,47 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
     }
 
 
+    @Override
     public T union(T other) {
         return dispatch.union((T)this, other);
     }
 
+    @Override
     public T star() {
         return dispatch.star((T)this);
     }
 
+    @Override
     public T plus() {
         return dispatch.plus((T)this);
     }
 
+    @Override
     public T optional() {
         return dispatch.optional((T) this);
     }
 
+    @Override
     public T repeat(int min, int max) {
         return dispatch.repeat((T)this, min, max);
     }
 
+    @Override
     public T repeatMax(int max) {
         return dispatch.repeatMax((T)this, max);
     }
 
+    @Override
     public T repeatMin(int min) {
         return dispatch.repeatMin((T)this, min);
     }
 
+    @Override
     public T append(char c) {
         return dispatch.append((T)this, c);
     }
 
+    @Override
     public T append(char min, char max) {
         return dispatch.append((T)this, min, max);
     }
@@ -164,24 +174,41 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         return dispatch.append((T)this, lbl);
     }
 
+    @Override
     public T concat(T other) {
         return dispatch.concat((T) this, other);
     }
 
+    @Override
     public T concat(T other, boolean accept) {
         return dispatch.concat((T) this, other, accept);
     }
 
+    @Override
     public T intersect(T other) {
         return dispatch.intersect((T) this, other);
     }
 
+    @Override
     public T determinize() {
         return dispatch.determinize((T)this);
     }
 
+    @Override
     public T expand(){
         return dispatch.expand((T)this);
+    }
+
+
+    @Override
+    public T complement() {
+        return dispatch.complement((T)this);
+    }
+
+
+    @Override
+    public T minus(T other) {
+        return dispatch.minus((T)this, other);
     }
 
     private void merge(Collection<State> states) {
@@ -262,20 +289,6 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
     }
 
 
-
-
-    public AbstractAutomaton complement() {
-        // @TODO implement
-
-        return null;
-    }
-
-    public AbstractAutomaton minus(dk.brics.automaton.Automaton other) {
-        // @TODO implement
-
-        return null;
-    }
-
     private void collapseStates(Predicate<State> p) {
 
         Set<State> fs;
@@ -290,14 +303,20 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
     }
 
 
-    private void removeUnreachableStates() {
-        AutomatonSlicerForward fw = new AutomatonSlicerForward(this);
-        AutomatonSlicerBackward bw = new AutomatonSlicerBackward(this);
-        Collection<State> chop = fw.slice(this.start);
-        chop.retainAll(bw.slice(this.getAcceptStates()));
-        Set<State> vertices = new HashSet<>(vertexSet());
-        vertices.removeAll(chop);
-        removeAllVertices(vertices);
+    protected void removeUnreachableStates() {
+        if(!hasAcceptStates()) {
+            Set<State> toRm = vertexSet().stream().filter(x -> !x.equals
+                    (start)).collect(Collectors.toSet());
+            removeAllVertices(toRm);
+        } else {
+            AutomatonSlicerForward fw = new AutomatonSlicerForward(this);
+            AutomatonSlicerBackward bw = new AutomatonSlicerBackward(this);
+            Collection<State> chop = fw.slice(this.start);
+            chop.retainAll(bw.slice(this.getAcceptStates()));
+            Set<State> vertices = new HashSet<>(vertexSet());
+            vertices.removeAll(chop);
+            removeAllVertices(vertices);
+        }
     }
 
     public void eliminateRedundantTransitions() {
@@ -381,7 +400,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
 
 
 
-    private Set<Transition> getSortedTransitions(State s) {
+    protected Set<Transition> getSortedTransitions(State s) {
         Set<Transition> sorted = new TreeSet<>();
         sorted.addAll(outgoingEdgesOf(s));
         return sorted;
@@ -394,11 +413,6 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         //Automat a = new Automat(this);
         //a.collapseStates(s -> !s.isAccept() && outDegreeOf(s) == 0);
         //a.collapseStates(s -> s.isAccept() && outDegreeOf(s) == 0);
-
-        if(!hasAcceptStates()) {
-            // nothing to minimize
-            return;
-        }
 
         removeUnreachableStates();
         Map<Set<State>, Boolean> inequality = new HashMap<>();

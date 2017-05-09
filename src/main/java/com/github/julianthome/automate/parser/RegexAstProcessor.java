@@ -2,7 +2,7 @@ package com.github.julianthome.automate.parser;
 
 import com.github.julianthome.automate.core.AutomatonProvider;
 import com.github.julianthome.automate.core.AbstractAutomaton;
-import com.github.julianthome.automate.core.BasicAutomatonFactory;
+import com.github.julianthome.automate.core.AutomatonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snt.inmemantlr.tree.Ast;
@@ -23,7 +23,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
     private AutomatonProvider provider = null;
 
     public RegexAstProcessor(Ast ast) {
-        this(ast, BasicAutomatonFactory.getInstance());
+        this(ast, AutomatonFactory.getInstance());
     }
 
     public RegexAstProcessor(Ast ast, AutomatonProvider provider) {

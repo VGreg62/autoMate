@@ -13,8 +13,8 @@ public class CharRange implements TransitionLabel{
 
     final static Logger LOGGER = LoggerFactory.getLogger(CharRange.class);
 
-    public char min;
-    public char max;
+    private char min;
+    private char max;
 
     public static CharRange ANY = new CharRange(Character.MIN_VALUE,
             Character.MAX_VALUE);

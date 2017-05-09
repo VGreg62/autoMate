@@ -8,16 +8,16 @@ import java.util.Collection;
 /**
  * Created by julian on 08/05/2017.
  */
-public class BasicAutomatonFactory implements AutomatonProvider<Automaton> {
+public class AutomatonFactory implements AutomatonProvider<Automaton> {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(BasicAutomatonFactory.class);
+    final static Logger LOGGER = LoggerFactory.getLogger(AutomatonFactory.class);
 
-    private static BasicAutomatonFactory fact = null;
+    private static AutomatonFactory fact = null;
 
 
-    public static BasicAutomatonFactory getInstance () {
+    public static AutomatonFactory getInstance () {
         if(fact == null) {
-            fact = new BasicAutomatonFactory();
+            fact = new AutomatonFactory();
         }
         return fact;
     }

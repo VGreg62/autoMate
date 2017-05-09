@@ -215,6 +215,44 @@ public class TestAutomaton {
 
     }
 
+    @Test
+    public void testComplement() {
+
+        Automaton a = new Automaton();
+        a = a.append('a', 'b');
+        a = a.append('t');
+        a = a.append('e');
+
+        a = a.complement();
+
+        Assert.assertFalse(a.match("ate"));
+        Assert.assertFalse(a.match("bte"));
+        Assert.assertTrue(a.match("xyzate"));
+        Assert.assertTrue(a.match("atexyzatexyz"));
+        Assert.assertTrue(a.match("xyzateatexyz"));
+
+        Assert.assertTrue(a.match("atexyzatexyzate"));
+        Assert.assertTrue(a.match("xyzateatexyzate"));
+
+        LOGGER.debug(a.toDot());
+    }
+
+
+    @Test
+    public void testMinus() {
+        Automaton a = getSimpleAutomaton();
+
+        Automaton c = a.complement();
+
+        Automaton isect = a.intersect(c);
+
+
+        LOGGER.debug(a.toDot());
+        LOGGER.debug(c.toDot());
+        LOGGER.debug(isect.toDot());
+
+    }
+
 
     @Test
     public void testDeterminize() {
@@ -289,7 +327,7 @@ public class TestAutomaton {
     @Test
     public void testMatch() {
 
-        BasicAutomatonFactory fact = BasicAutomatonFactory.getInstance();
+        AutomatonFactory fact = AutomatonFactory.getInstance();
         Automaton c = fact.getAllAccepting();
 
 

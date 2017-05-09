@@ -6,22 +6,37 @@ import java.util.*;
 public class Automaton extends AbstractAutomaton<Automaton> {
 
 
+    protected String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    protected Automaton(String name) {
+        this();
+        this.name = name;
+    }
+
     protected Automaton() {
-        super(BasicAutomatonFactory.getInstance(),
+        super(AutomatonFactory.getInstance(),
                 false);
     }
 
     public Automaton(Automaton a) {
-        super(BasicAutomatonFactory
+        super(AutomatonFactory
                 .getInstance(),a);
     }
 
     public Automaton(State start, Collection<Transition> t) {
-        super(BasicAutomatonFactory.getInstance(),start,t);
+        super(AutomatonFactory.getInstance(),start,t);
     }
 
     protected Automaton(boolean acceptsEmptyString) {
-        super(BasicAutomatonFactory.getInstance(),acceptsEmptyString);
+        super(AutomatonFactory.getInstance(),acceptsEmptyString);
     }
 
 

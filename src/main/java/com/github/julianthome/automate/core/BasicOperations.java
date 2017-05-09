@@ -79,13 +79,20 @@ public class BasicOperations <T extends AbstractAutomaton> {
 
     public T intersect(T fst, T snd) {
 
+
+        LOGGER.debug("intersect 1");
+
+
+        LOGGER.debug("intersect 2");
+
+
         T ret = provider.getNewAutomaton();
 
         LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
 
-        Map<State, State> smap = new HashMap<>();
-
-        smap.put(snd.getStart(), ret.getStart());
+        Tuple<State,State> start = new Tuple<>(fst.start, snd.start);
+        Map<Tuple<State,State>, State> smap = new HashMap<>();
+        smap.put(start, ret.getStart());
 
         worklist.add(new Tuple<>(fst.start, snd.start));
 
@@ -101,41 +108,40 @@ public class BasicOperations <T extends AbstractAutomaton> {
 
             visited.add(s);
 
-            Set<Transition> fstt = fst.outgoingEdgesOf(s.getKey());
-
-            Set<Transition> sndt = snd.outgoingEdgesOf(s.getVal());
+            Set<Transition> fstt = fst.getSortedTransitions(s.getKey());
+            Set<Transition> sndt = snd.getSortedTransitions(s.getVal());
 
 
             for (Transition tfst : fstt) {
 
                 for (Transition tsnd : sndt) {
 
-                    TransitionLabel lbl = tfst.getLabel().isect(tsnd.getLabel
-                            ());
+                    Tuple<State,State> target = new Tuple(tfst.getTarget(), tsnd
+                            .getTarget());
+
+                    TransitionLabel lbl = tfst.getLabel().isect(tsnd.getLabel());
+
+                    LOGGER.debug("isect {}", lbl);
 
                     if (lbl != null) {
 
-                        if (!smap.containsKey(tsnd.getSource()))
-                            smap.put(tsnd.getSource(), ret.createNewState
-                                    (tsnd.getSource().getKind()));
+                        State.Kind kind  = tfst.getTarget().isAccept() &&
+                                tsnd.getTarget().isAccept() ?
+                                State.Kind.ACCEPT : State.Kind.NORMAL;
 
-                        if (!smap.containsKey(tsnd.getTarget()))
-                            smap.put(tsnd.getTarget(), ret.createNewState
-                                    (tsnd.getTarget().getKind()));
+                        if (!smap.containsKey(target))
+                            smap.put(target, ret.createNewState(kind));
 
 
-                        ret.addTransition(new Transition(smap.get(tsnd
-                                .getSource()), smap.get(tsnd.getTarget()),
-                                lbl));
+                        ret.addTransition(new Transition(smap.get(s), smap
+                                .get(target), lbl));
 
-                        worklist.add(new Tuple<>(tfst.getTarget(), tsnd
-                                .getTarget()));
+                        worklist.add(target);
                     }
                 }
 
             }
         }
-
 
         return postProcess(ret);
     }
@@ -159,10 +165,6 @@ public class BasicOperations <T extends AbstractAutomaton> {
         T b = provider.getNewAutomaton(snd);
 
         State end = a.addVirtualEnd();
-        LOGGER.debug("FST");
-        LOGGER.debug(a.toDot());
-        LOGGER.debug(b.toDot());
-        LOGGER.debug("FST");
 
         Map<State, State> smap = new HashMap<>();
 
@@ -304,19 +306,12 @@ public class BasicOperations <T extends AbstractAutomaton> {
 
     public T determinize(T fst) {
 
-
-        // split all redundant transitions
-        //fst.eliminateRedundantTransitions();
-
         LOGGER.debug(fst.toDot());
 
         T dfa = provider.getNewAutomaton();
 
 
         Map<State, Set<State>> eclosure = fst.getEpsilonClosure();
-
-        LOGGER.debug("determinze");
-        LOGGER.debug("E-closure {}", eclosure);
 
 
         Map<Set<State>, State> nstat = new HashMap<>();
@@ -340,6 +335,60 @@ public class BasicOperations <T extends AbstractAutomaton> {
 
         return dfa;
 
+    }
+
+    public T minus (T fst, T snd){
+
+        LOGGER.debug("minus");
+
+        if(fst.isEmpty() && !snd.isEmpty())
+            return provider.getEmtpyAutomaton();
+
+        if(!fst.isEmpty() && snd.isEmpty())
+            return provider.getNewAutomaton(fst);
+
+        LOGGER.debug("intersect both automata");
+
+        return intersect(fst, complement(snd));
+    }
+
+    public T complement(T fst) {
+        T det = determinize(fst);
+
+        State s = det.createNewState(State.Kind.NORMAL);
+
+        det.addVertex(s);
+        det.addTransition(new Transition(s,s,CharRange.ANY.clone()));
+
+        Set<State> states = det.vertexSet();
+        for (State p : states) {
+            int maxi = Character.MIN_VALUE;
+
+            Set<Transition> trans = det.getSortedTransitions(p);
+            for (Transition t : trans) {
+
+                CharRange r = (CharRange)t.getLabel();
+
+                if (r.getMin() > maxi)
+                    det.addTransition(new Transition(p,s, new CharRange(
+                            (char)maxi,(char)(r.getMin()-1))));
+                if (r.getMax() + 1 > maxi)
+                    maxi = r.getMax() + 1;
+            }
+            if (maxi <= Character.MAX_VALUE)
+                det.addTransition(new Transition(p,s,(char)maxi,Character.MAX_VALUE));
+        }
+
+
+        Set<State> dstate = det.vertexSet();
+
+        for (State p : dstate)
+            p.setKind(p.isAccept() ? State.Kind.NORMAL : State.Kind.ACCEPT);
+
+
+        det.removeUnreachableStates();
+
+        return det;
     }
 
 
