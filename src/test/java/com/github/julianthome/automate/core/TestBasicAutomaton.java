@@ -258,7 +258,7 @@ public class TestBasicAutomaton {
         a2 = a2.append('z');
 
         Automaton a3 = new BasicAutomaton();
-        a3 = a3.append('b', 'c');
+        a3 = a3.append('b', 'g');
         a3 = a3.append('u');
         a3 = a3.append('t');
 
@@ -269,18 +269,21 @@ public class TestBasicAutomaton {
 
         Automaton a5 = a1.union(a2).union(a3).union(a4);
 
-        LOGGER.debug(a5.toDot());
+        Assert.assertTrue(a5.match("ate"));
+        Assert.assertTrue(a5.match("bte"));
+        Assert.assertTrue(a5.match("cte"));
+        Assert.assertTrue(a5.match("dte"));
+        Assert.assertTrue(a5.match("ete"));
 
+        Assert.assertTrue(a5.match("but"));
+        Assert.assertTrue(a5.match("dut"));
+        Assert.assertTrue(a5.match("eut"));
+        Assert.assertTrue(a5.match("fut"));
+        Assert.assertTrue(a5.match("gut"));
 
-        a5.minimize();
+        Assert.assertTrue(a5.match("x00"));
 
-        LOGGER.debug(a5.toDot());
-
-        a5.checkTransitions();
-        LOGGER.debug(a5.toDot());
-
-        Automaton aet = a5.determinize();
-        LOGGER.debug(aet.toDot());
+        Assert.assertFalse(a5.match("gte"));
     }
 
     @Test

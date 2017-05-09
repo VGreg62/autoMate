@@ -307,6 +307,24 @@ public class Automaton<T extends Automaton>
     }
 
 
+    private Tuple<Set<TransitionLabel>, Set<TransitionLabel>> splitLabels
+            (TransitionLabel t1, TransitionLabel t2) {
+
+        Set<TransitionLabel> fst = new HashSet<>();
+        Set<TransitionLabel> snd = new HashSet<>();
+
+        TransitionLabel isect = t1.isect(t2);
+
+        fst.addAll(t1.minus(isect));
+        snd.addAll(t2.minus(isect));
+        fst.add(isect);
+        snd.add(isect);
+
+        LOGGER.debug("new split {} {}", fst, snd);
+
+        return new Tuple<>(fst,snd);
+    }
+
     private void checkForRedundatTransitions(State s) {
 
         Set<Transition> toAdd = new HashSet<>();
@@ -320,21 +338,28 @@ public class Automaton<T extends Automaton>
             if(prev == null)
                 prev = t;
 
-            if(prev.getLabel().contains(t.getLabel()) && !prev.getLabel()
-                    .equals(t.getLabel())) {
+            if(prev.getLabel().isect(t.getLabel()) != null && !prev.getLabel().equals(t.getLabel())) {
 
-                Collection<TransitionLabel> lbl = prev.getLabel().minus(t.getLabel());
 
-                toAdd.add(new Transition(prev.getSource(), prev.getTarget(),
-                        t.getLabel().clone()));
+                Tuple<Set<TransitionLabel>, Set<TransitionLabel>>
+                lbls = splitLabels(prev.getLabel(), t.getLabel());
 
+                for(TransitionLabel l : lbls.getKey()) {
+                    toAdd.add(new Transition(prev.getSource(), prev.getTarget(),
+                        l.clone()));
+                }
+
+
+                for(TransitionLabel l : lbls.getVal()) {
+                    toAdd.add(new Transition(t.getSource(), t.getTarget(),
+                            l.clone()));
+                }
 
                 toRm.add(prev);
+                toRm.add(t);
                 LOGGER.debug("rm {}", prev);
 
-                for(TransitionLabel l : lbl) {
-                    toAdd.add(new Transition(prev.getSource(), prev.getTarget(), l));
-                }
+
             } else {
                 prev = t;
             }
