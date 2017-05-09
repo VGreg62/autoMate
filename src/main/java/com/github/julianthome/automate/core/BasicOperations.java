@@ -35,14 +35,14 @@ public class BasicOperations <T extends Automaton> {
         Set<State> vs = first.vertexSet();
         for (State s : vs) {
             if (!smap1.containsKey(s)) {
-                smap1.put(s, ret.createNewState(s));
+                smap1.put(s, ret.createNewState(s.getKind()));
             }
         }
 
         Set<State> os = snd.vertexSet();
         for (State s : os) {
             if (!smap2.containsKey(s)) {
-                smap2.put(s, ret.createNewState(s));
+                smap2.put(s, ret.createNewState(s.getKind()));
             }
         }
 
@@ -116,12 +116,12 @@ public class BasicOperations <T extends Automaton> {
                     if (lbl != null) {
 
                         if (!smap.containsKey(tsnd.getSource()))
-                            smap.put(tsnd.getSource(), ret.createNewState(tsnd
-                                    .getSource(), tfst.getSource()));
+                            smap.put(tsnd.getSource(), ret.createNewState
+                                    (tsnd.getSource().getKind()));
 
                         if (!smap.containsKey(tsnd.getTarget()))
-                            smap.put(tsnd.getTarget(), ret.createNewState(tsnd
-                                    .getTarget(), tfst.getTarget()));
+                            smap.put(tsnd.getTarget(), ret.createNewState
+                                    (tsnd.getTarget().getKind()));
 
 
                         ret.addTransition(new Transition(smap.get(tsnd
@@ -159,15 +159,17 @@ public class BasicOperations <T extends Automaton> {
         T b = provider.getNewAutomaton(snd);
 
         State end = a.addVirtualEnd();
-        LOGGER.debug("ffst");
+        LOGGER.debug("FST");
         LOGGER.debug(a.toDot());
+        LOGGER.debug(b.toDot());
+        LOGGER.debug("FST");
 
         Map<State, State> smap = new HashMap<>();
 
         Set<State> vs = b.vertexSet();
 
         for (State s : vs) {
-            smap.put(s, a.createNewState(s));
+            smap.put(s, a.createNewState(s.getKind()));
         }
 
         Set<Transition> es = b.edgeSet();
@@ -214,7 +216,8 @@ public class BasicOperations <T extends Automaton> {
         }
 
 
-        return postProcess(concat(tauto, star(pat)));
+        tauto = concat(tauto,star(pat));
+        return postProcess(tauto);
     }
 
     public T repeatMax(T fst, int max) {
@@ -301,20 +304,34 @@ public class BasicOperations <T extends Automaton> {
 
     public T determinize(T fst) {
 
+
         LOGGER.debug(fst.toDot());
 
         T dfa = provider.getNewAutomaton();
+
+
+        // nothing to determinze
+//        if(!fst.hasAcceptStates()) {
+//            return provider.getNewAutomaton(fst);
+//        }
 
         Map<State, Set<State>> eclosure = fst.getEpsilonClosure();
 
         LOGGER.debug("determinze");
         LOGGER.debug("E-closure {}", eclosure);
 
+
         Map<Set<State>, State> nstat = new HashMap<>();
 
         nstat.put(eclosure.get(fst.start), dfa.start);
 
-        if (eclosure.get(fst.start).stream().anyMatch(s -> s.isAccept())) {
+        assert eclosure.containsKey(fst.start);
+
+        assert fst.start != null;
+
+        if (eclosure.get(fst.start).stream()
+                .anyMatch(s -> s
+                .isAccept())) {
             dfa.start.setKind(State.Kind.ACCEPT);
         }
 
@@ -368,7 +385,7 @@ public class BasicOperations <T extends Automaton> {
 
             LOGGER.debug("SS {} :: {}", ss, kind);
             if (!nstat.containsKey(ss)) {
-                nstat.put(ss, dfa.createNewState(kind, ss));
+                nstat.put(ss, dfa.createNewState(kind));
             }
         }
 

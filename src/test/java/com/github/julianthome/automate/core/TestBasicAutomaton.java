@@ -281,11 +281,32 @@ public class TestBasicAutomaton {
 
         Automaton aet = a5.determinize();
         LOGGER.debug(aet.toDot());
+    }
+
+    @Test
+    public void testMatch() {
+
+        BasicAutomatonFactory fact = BasicAutomatonFactory.getInstance();
+        BasicAutomaton c = fact.getAllAccepting();
 
 
+        BasicAutomaton x = fact.getNewAutomaton();
+        x = x.append('x');
 
 
+        BasicAutomaton concat = c.concat(x);
 
+        Assert.assertTrue(concat.match("Asterix"));
+        Assert.assertTrue(concat.match("Idefix"));
+        Assert.assertTrue(concat.match("Metusalix"));
+        Assert.assertTrue(concat.match("Unix"));
+        Assert.assertTrue(concat.match("Linux"));
+
+        Assert.assertFalse(concat.match("Asteri"));
+        Assert.assertFalse(concat.match("Idefi"));
+        Assert.assertFalse(concat.match("Metusali"));
+        Assert.assertFalse(concat.match("Uni"));
+        Assert.assertFalse(concat.match("Linu"));
     }
 
 

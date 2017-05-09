@@ -66,9 +66,9 @@ public class Automaton<T extends Automaton>
 
         for (Transition trans : t) {
 
-            smap.put(trans.getSource(), createNewState(trans.getSource()));
+            smap.put(trans.getSource(), createNewState(trans.getSource().getKind()));
 
-            smap.put(trans.getTarget(), createNewState(trans.getTarget()));
+            smap.put(trans.getTarget(), createNewState(trans.getTarget().getKind()));
 
             if (start.equals(trans.getSource()))
                 this.start = trans.getSource();
@@ -323,8 +323,7 @@ public class Automaton<T extends Automaton>
             if(prev.getLabel().contains(t.getLabel()) && !prev.getLabel()
                     .equals(t.getLabel())) {
 
-                Collection<TransitionLabel> lbl = prev.getLabel().minus(t
-                        .getLabel());
+                Collection<TransitionLabel> lbl = prev.getLabel().minus(t.getLabel());
 
                 toAdd.add(new Transition(prev.getSource(), prev.getTarget(),
                         t.getLabel().clone()));
@@ -346,6 +345,15 @@ public class Automaton<T extends Automaton>
     }
 
 
+    public void eliminateAcceptStates() {
+        getAcceptStates().forEach(v -> v.setKind(State.Kind.NORMAL));
+        assert !hasAcceptStates();
+    }
+
+    public boolean hasAcceptStates() {
+        return getAcceptStates().size() > 0;
+    }
+
 
 
     private Set<Transition> getSortedTransitions(State s) {
@@ -361,6 +369,11 @@ public class Automaton<T extends Automaton>
         //Automat a = new Automat(this);
         //a.collapseStates(s -> !s.isAccept() && outDegreeOf(s) == 0);
         //a.collapseStates(s -> s.isAccept() && outDegreeOf(s) == 0);
+
+        if(!hasAcceptStates()) {
+            // nothing to minimize
+            return;
+        }
 
         removeUnreachableStates();
         Map<Set<State>, Boolean> inequality = new HashMap<>();
@@ -679,20 +692,6 @@ public class Automaton<T extends Automaton>
         return new State(kind, snum++);
     }
 
-    protected State createNewState(State ... other) {
-        return createNewState(Arrays.asList(other));
-    }
 
-    protected State createNewState(Collection<State> other) {
 
-        boolean accept = other.stream().filter(s -> s.isAccept()).count() ==
-                other.size();
-
-        return createNewState(accept ? State.Kind.ACCEPT : State.Kind.NORMAL,
-                other);
-    }
-
-    protected State createNewState(State.Kind kind, Collection<State> other) {
-        return createNewState(kind);
-    }
 }

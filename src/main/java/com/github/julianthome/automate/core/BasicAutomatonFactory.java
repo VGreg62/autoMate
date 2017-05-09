@@ -10,7 +10,7 @@ import java.util.Collection;
  */
 public class BasicAutomatonFactory implements AutomatonProvider<BasicAutomaton> {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(LabelledAutomatonFactory.class);
+    final static Logger LOGGER = LoggerFactory.getLogger(BasicAutomatonFactory.class);
 
     private static BasicAutomatonFactory fact = null;
 
