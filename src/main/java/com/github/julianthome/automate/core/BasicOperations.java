@@ -362,33 +362,31 @@ public class BasicOperations <T extends AbstractAutomaton> {
 
         Set<State> states = det.vertexSet();
         for (State p : states) {
-            int maxi = Character.MIN_VALUE;
+            char cmin = Character.MIN_VALUE;
 
             Set<Transition> trans = det.getSortedTransitions(p);
             for (Transition t : trans) {
 
                 CharRange r = (CharRange)t.getLabel();
 
-                if (r.getMin() > maxi)
+                if (r.getMin() > cmin)
                     det.addTransition(new Transition(p,s, new CharRange(
-                            (char)maxi,(char)(r.getMin()-1))));
-                if (r.getMax() + 1 > maxi)
-                    maxi = r.getMax() + 1;
+                            cmin,(char)(r.getMin()-1))));
+                if (r.getMax() + 1 > cmin)
+                    cmin = (char)(r.getMax() + 1);
             }
-            if (maxi <= Character.MAX_VALUE)
-                det.addTransition(new Transition(p,s,(char)maxi,Character.MAX_VALUE));
+            if (cmin <= Character.MAX_VALUE)
+                det.addTransition(new Transition(p,s,cmin,Character.MAX_VALUE));
         }
 
 
         Set<State> dstate = det.vertexSet();
 
-        for (State p : dstate)
+        for (State p : dstate) {
             p.setKind(p.isAccept() ? State.Kind.NORMAL : State.Kind.ACCEPT);
-
-
-        det.removeUnreachableStates();
-
-        return det;
+        }
+        
+        return postProcess(det);
     }
 
 
