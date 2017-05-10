@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         extends DirectedPseudograph<State, Transition>
-        implements AutomatonInterface<T> {
+        implements AutomatonConstructionInterface<T> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(AbstractAutomaton.class);
 

@@ -41,7 +41,7 @@ public class AutomatonFactory implements AutomatonProvider<Automaton> {
     private static AutomatonFactory fact = null;
 
 
-    public static AutomatonFactory getInstance () {
+    public static AutomatonFactory getInstance() {
         if(fact == null) {
             fact = new AutomatonFactory();
         }

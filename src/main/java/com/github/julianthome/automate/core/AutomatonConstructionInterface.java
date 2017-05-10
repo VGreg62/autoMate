@@ -24,24 +24,19 @@
  * SOFTWARE.
  **/
 
-package com.github.julianthome.automate.ext;
+package com.github.julianthome.automate.core;
 
-import com.github.julianthome.automate.core.*;
-
-import java.util.Collection;
-
-public class MemorizingAutomaton extends AbstractAutomaton<MemorizingAutomaton> {
-
-
-    protected MemorizingAutomaton(AutomatonProvider<MemorizingAutomaton> provider, AbstractAutomaton a) {
-        super(provider, a);
-    }
-
-    protected MemorizingAutomaton(AutomatonProvider<MemorizingAutomaton> provider, State start, Collection<Transition> t) {
-        super(provider, start, t);
-    }
-
-    protected MemorizingAutomaton(AutomatonProvider<MemorizingAutomaton> provider, boolean acceptsEmptyString) {
-        super(provider, acceptsEmptyString);
-    }
+public interface AutomatonConstructionInterface<T> extends
+        AutomatonInterface<T> {
+    T star();
+    T plus();
+    T optional();
+    T repeat(int min, int max);
+    T repeatMax(int max);
+    T repeatMin(int min);
+    T append(char c);
+    T append(char min, char max);
+    T concat(T other, boolean accept);
+    T determinize();
+    T expand();
 }

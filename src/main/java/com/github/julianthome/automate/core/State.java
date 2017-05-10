@@ -84,14 +84,5 @@ public class State implements DotSerializer {
         return this.id == s.id;
     }
 
-    @Override
-    public int hashCode() {
-        return id;
-    }
-
-    @Override
-    public String toString() {
-        return "s" + id;
-    }
 
 }

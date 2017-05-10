@@ -24,51 +24,57 @@
  * SOFTWARE.
  **/
 
-package com.github.julianthome.automate.core;
+package com.github.julianthome.automate.ext;
+
+import com.github.julianthome.automate.core.Automaton;
+import com.github.julianthome.automate.core.AutomatonFactory;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TestTrackAutomaton {
+
+    final static Logger LOGGER = LoggerFactory.getLogger(TestTrackAutomaton.class);
 
 
-import java.util.*;
-
-public class Automaton extends AbstractAutomaton<Automaton> {
+    private Automaton getSimpleAutomaton0(String name) {
 
 
-    protected String name;
+        Automaton a1 = AutomatonFactory.getInstance().getNewAutomaton();
+        a1 = a1.append('a', 'b');
+        a1 = a1.append('t');
+        a1 = a1.append('e');
 
-    public String getName() {
-        return name;
+
+        Automaton a2 = AutomatonFactory.getInstance().getNewAutomaton();
+
+        Automaton a3 = AutomatonFactory.getInstance().getNewAutomaton();
+        a3 = a3.append('x');
+        a3 = a3.append('y');
+        a3 = a3.append('z');
+
+
+        Automaton a = a1.union(a2).union(a3);
+
+        a.setName(name);
+        return a;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Test
+    public void getSimpleAutomaton() {
+        TrackAutomaton ma1 = new TrackAutomaton("a");
+        TrackAutomaton ma2 = new TrackAutomaton("b");
+        TrackAutomaton ma3 = ma1.union(ma2);
+        TrackAutomaton ma4 = new TrackAutomaton(getSimpleAutomaton0("test"));
+        ma3 = ma4.union(ma3);
+
+        LOGGER.debug(ma3.toDot());
+
     }
 
-    protected Automaton(String name) {
-        this();
-        this.name = name;
-    }
 
-    protected Automaton() {
-        super(AutomatonFactory.getInstance(),
-                false);
-    }
-
-    public Automaton(Automaton a) {
-        super(AutomatonFactory
-                .getInstance(),a);
-        this.name = a.name;
-    }
-
-    public Automaton(State start, Collection<Transition> t) {
-        super(AutomatonFactory.getInstance(),start,t);
-    }
-
-    protected Automaton(boolean acceptsEmptyString) {
-        super(AutomatonFactory.getInstance(),acceptsEmptyString);
-    }
-
-    public boolean hasName() {
-        return name != null;
-    }
 
 
 }
+
+
