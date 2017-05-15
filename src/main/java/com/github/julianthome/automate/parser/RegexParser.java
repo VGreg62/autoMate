@@ -94,13 +94,17 @@ public enum RegexParser {
         try {
             gp.parse(rexp);
 
-            LOGGER.debug(dlist.getAst().toDot());
+            //LOGGER.debug(dlist.getAst().toDot());
 
             rap = new RegexAstProcessor(dlist.getAst());
         } catch (IllegalWorkflowException e) {
             System.err.println("DNF transformer- intial parsing error");
             return null;
         }
+
+
+        LOGGER.debug(dlist.getAst().toDot());
+
 
         try {
             rap.process();

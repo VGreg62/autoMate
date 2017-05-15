@@ -26,6 +26,7 @@
 
 package com.github.julianthome.automate.core;
 
+import com.github.julianthome.automate.parser.RegexParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +72,7 @@ public class AutomatonFactory implements AutomatonProvider<Automaton> {
 
     @Override
     public Automaton getNewAutomaton(Automaton a) {
-        return new Automaton((Automaton)a);
+        return new Automaton(a);
     }
 
     @Override
@@ -82,6 +83,16 @@ public class AutomatonFactory implements AutomatonProvider<Automaton> {
     @Override
     public Automaton getNewAutomaton(State start, Collection<Transition> t) {
         return new Automaton(start, t);
+    }
+
+    @Override
+    public Automaton getNewAutomaton(String rexp) {
+        return (Automaton)RegexParser.INSTANCE.getAutomaton(rexp);
+    }
+
+    @Override
+    public Automaton getNewNamedAutomaton(String name, String rexp) {
+        return null;
     }
 
 }

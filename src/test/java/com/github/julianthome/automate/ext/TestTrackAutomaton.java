@@ -45,7 +45,6 @@ public class TestTrackAutomaton {
         a1 = a1.append('t');
         a1 = a1.append('e');
 
-
         Automaton a2 = AutomatonFactory.getInstance().getNewAutomaton();
 
         Automaton a3 = AutomatonFactory.getInstance().getNewAutomaton();
@@ -67,12 +66,8 @@ public class TestTrackAutomaton {
         TrackAutomaton ma3 = ma1.union(ma2);
         TrackAutomaton ma4 = new TrackAutomaton(getSimpleAutomaton0("test"));
         ma3 = ma4.union(ma3);
-
         LOGGER.debug(ma3.toDot());
-
     }
-
-
 
 
 }

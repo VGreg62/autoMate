@@ -36,4 +36,6 @@ public interface AutomatonProvider<T extends AbstractAutomaton> {
     T getNewAutomaton(T a);
     T getEmtpyAutomaton();
     T getNewAutomaton(State start, Collection<Transition> t);
+    T getNewAutomaton(String rexp);
+    T getNewNamedAutomaton(String name, String rexp);
 }

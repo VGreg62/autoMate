@@ -113,16 +113,27 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 }
 
                 break;
+            case "literal":
+                if(n.getChildren().size() == 0) {
+                    break;
+                }
             case "root":
             case "number":
-            case "literal":
             case "shared_literal":
             case "cc_literal":
             case "alternation":
                 if(n.getChildren().size() > 1) {
                     smap.put(n, unifyChildren(n));
                 } else {
-                    assert n.getChildren().size() == 1;
+                    LOGGER.debug(this.ast.toDot());
+                    LOGGER.debug("child {}", n.getChildren().size());
+                    LOGGER.debug("id {}", n.getId());
+                    assert n.getChildren().size() <= 1;
+
+                    if(n.getChildren().size() > 1)
+                        throw new ParserException("Parsing error for token "
+                                + n.getLabel());
+
                     simpleProp(n);
                 }
                 break;
@@ -132,7 +143,6 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 a = a.append(n.getLabel().charAt(0));
                 smap.put(n, a);
                 break;
-
             case "cc_atom":
                 String lbl = n.getLabel();
                 LOGGER.debug("cc atom {}", lbl);

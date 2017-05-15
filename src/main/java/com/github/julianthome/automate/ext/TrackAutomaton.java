@@ -46,6 +46,15 @@ public class TrackAutomaton extends DirectedAcyclicGraph<MemAutomatonNode,
     private MemAutomatonNode root = null;
     private int id = 0;
 
+    public TrackAutomaton(String name, String rexp) {
+        super(MemAutomatonEdge.class);
+        MemAutomatonNode mn  = getNewNodeOfKind(MemAutomatonNode.Kind.LEAF,
+                AutomatonFactory.getInstance().getNewAutomaton(rexp));
+        root = mn;
+        root.getAutomaton().setName(name);
+    }
+
+
     public TrackAutomaton(String name) {
         this();
         root.getAutomaton().setName(name);
