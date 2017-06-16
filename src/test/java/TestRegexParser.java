@@ -67,7 +67,6 @@ public class TestRegexParser {
         Assert.assertTrue(a.match("abczzd"));
         Assert.assertTrue(a.match("afdasdkjf2123u-13.4nj;af0391h41;jac " +
                 "afjasdpifw"));
-
     }
 
 
@@ -107,6 +106,37 @@ public class TestRegexParser {
         Assert.assertTrue(a.match(")))))))))))))))))"));
         Assert.assertFalse(a.match(""));
         LOGGER.debug(a.toDot());
+    }
+
+    @Test
+    public void testMinMax() {
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("[a-z0-9_-]{3,16}");
+
+        Assert.assertFalse(a.match("09"));
+        Assert.assertTrue(a.match("abcabcabc"));
+        Assert.assertTrue(a.match("aaaaaaaaaa000000"));
+        Assert.assertFalse(a.match("aaaaaaaaaa000000z"));
+
+    }
+
+
+    @Test
+    public void testUsername() {
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("^[a-z0-9_-]{3,16}");
+
+        Assert.assertTrue(a.match("HELLO"));
+        Assert.assertTrue(a.match("JOHN"));
+        Assert.assertTrue(a.match("jo"));
+        Assert.assertTrue(a.match("xy"));
+        Assert.assertTrue(a.match(""));
+
+        Assert.assertFalse(a.match("john"));
+        Assert.assertFalse(a.match("hello"));
+
+
+        Assert.assertTrue(a.match
+                ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+
     }
 
 }

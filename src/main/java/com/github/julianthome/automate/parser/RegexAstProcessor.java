@@ -37,6 +37,7 @@ import org.snt.inmemantlr.tree.Ast;
 import org.snt.inmemantlr.tree.AstNode;
 import org.snt.inmemantlr.tree.AstProcessor;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,7 +97,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
     @Override
     protected void process(AstNode n) throws ParserException {
 
-        LOGGER.debug("++++++++++++++++++++++++++ {}", n.getRule());
+        LOGGER.debug("++++++++++++++++++++++++++ {}:{}", n.getRule(), n.getId());
 
         switch (n.getRule()) {
 
@@ -116,6 +117,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
 
                 break;
             case "literal":
+            case "cc_literal":
                 if(n.getChildren().size() == 0) {
                     Automaton a = AutomatonFactory.getInstance().getNewAutomaton();
 
@@ -136,14 +138,13 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
             case "root":
             case "number":
             case "shared_literal":
-            case "cc_literal":
             case "alternation":
                 if(n.getChildren().size() > 1) {
                     smap.put(n, unifyChildren(n));
                 } else {
-                    LOGGER.debug(this.ast.toDot());
+                    //LOGGER.debug(this.ast.toDot());
                     LOGGER.debug("child {}", n.getChildren().size());
-                    LOGGER.debug("id {}", n.getId());
+                    LOGGER.debug("id {} : {}", n.getId(), n.getLabel());
                     assert n.getChildren().size() <= 1;
 
                     if(n.getChildren().size() > 1)
@@ -200,6 +201,8 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                             continue;
                         }
 
+                        LOGGER.debug("C {}:{}", c.getLabel(), c.getId());
+
                         na = na.union(smap.get(c));
 
                     }
@@ -213,7 +216,19 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 break;
             case "expr":
                 if(n.getChildren().size() > 1) {
-                    smap.put(n, concatChildren(n));
+                    if(!n.getFirstChild().getLabel().equals("^")) {
+                        smap.put(n, concatChildren(n));
+                    } else {
+                        // negation
+                        assert n.getChildren().size() > 1;
+                        List<AstNode> childs = n.getChildren();
+                        AbstractAutomaton concat = provider.getNewAutomaton();
+                        for(int i = 1; i < n.getChildren().size(); i++) {
+                            concat = concat.concat(smap.get(n.getChild(i)));
+                        }
+                        concat = concat.complement();
+                        smap.put(n, concat);
+                    }
                 } else {
                     assert n.getChildren().size() == 1;
                     simpleProp(n);
