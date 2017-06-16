@@ -26,9 +26,11 @@
 
 package com.github.julianthome.automate.parser;
 
-import com.github.julianthome.automate.core.AutomatonProvider;
 import com.github.julianthome.automate.core.AbstractAutomaton;
+import com.github.julianthome.automate.core.Automaton;
 import com.github.julianthome.automate.core.AutomatonFactory;
+import com.github.julianthome.automate.core.AutomatonProvider;
+import com.github.julianthome.automate.utils.EscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snt.inmemantlr.tree.Ast;
@@ -57,9 +59,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
 
     @Override
     public AbstractAutomaton getResult() {
-        AbstractAutomaton a = smap.get(ast.getRoot());
-        a.minimize();
-        return a;
+        return smap.get(ast.getRoot());
     }
 
     @Override
@@ -96,6 +96,8 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
     @Override
     protected void process(AstNode n) throws ParserException {
 
+        LOGGER.debug("++++++++++++++++++++++++++ {}", n.getRule());
+
         switch (n.getRule()) {
 
             case "atom":
@@ -115,8 +117,22 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 break;
             case "literal":
                 if(n.getChildren().size() == 0) {
-                    break;
+                    Automaton a = AutomatonFactory.getInstance().getNewAutomaton();
+
+                    String lbl = EscapeUtils.unescapeSpecialCharacters(n.getLabel());
+
+                    assert lbl.length() == 1;
+                    LOGGER.debug("LBL {}", lbl);
+
+                    a = a.append(lbl.charAt(0));
+
+                    LOGGER.debug(a.toDot());
+                    smap.put(n, a);
+                } else {
+                    assert n.getChildren().size() == 1;
+                    simpleProp(n);
                 }
+                break;
             case "root":
             case "number":
             case "shared_literal":
@@ -194,7 +210,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 } else {
                     simpleProp(n);
                 }
-
+                break;
             case "expr":
                 if(n.getChildren().size() > 1) {
                     smap.put(n, concatChildren(n));
@@ -214,11 +230,14 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                     AstNode last = n.getChildren().get(1);
                     AstNode first = n.getChildren().get(0);
 
+                    LOGGER.debug("first:{}, last:{}",first,last);
                     String quant = last.getLabel();
+
+                    assert smap.containsKey(first);
 
                     AbstractAutomaton fauto = smap.get(first);
 
-                    LOGGER.debug("fauto {}", fauto.toDot());
+                    //LOGGER.debug("fauto {}", fauto.toDot());
 
                     assert fauto != null;
 

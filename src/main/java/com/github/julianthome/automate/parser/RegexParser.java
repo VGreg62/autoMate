@@ -94,7 +94,7 @@ public enum RegexParser {
         try {
             gp.parse(rexp);
 
-            //LOGGER.debug(dlist.getAst().toDot());
+            LOGGER.debug(dlist.getAst().toDot());
 
             rap = new RegexAstProcessor(dlist.getAst());
         } catch (IllegalWorkflowException e) {

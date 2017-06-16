@@ -38,6 +38,10 @@ public class TestRegexParser {
 
     final static Logger LOGGER = LoggerFactory.getLogger(TestRegexParser.class);
 
+    @Test
+    public void simple() {
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("c*");
+    }
 
     @Test
     public void testPattern0() {
@@ -92,6 +96,16 @@ public class TestRegexParser {
             Assert.assertFalse(a.match(String.valueOf(i)));
         }
 
+        LOGGER.debug(a.toDot());
+    }
+
+
+    @Test
+    public void testPattern3() {
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("\\)+");
+        Assert.assertTrue(a.match(")"));
+        Assert.assertTrue(a.match(")))))))))))))))))"));
+        Assert.assertFalse(a.match(""));
         LOGGER.debug(a.toDot());
     }
 

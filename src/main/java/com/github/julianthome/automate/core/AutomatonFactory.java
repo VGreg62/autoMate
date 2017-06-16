@@ -32,9 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
-/**
- * Created by julian on 08/05/2017.
- */
 public class AutomatonFactory implements AutomatonProvider<Automaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(AutomatonFactory.class);

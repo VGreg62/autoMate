@@ -48,13 +48,11 @@ public class Automaton extends AbstractAutomaton<Automaton> {
     }
 
     protected Automaton() {
-        super(AutomatonFactory.getInstance(),
-                false);
+        super(AutomatonFactory.getInstance(), false);
     }
 
     public Automaton(Automaton a) {
-        super(AutomatonFactory
-                .getInstance(),a);
+        super(AutomatonFactory.getInstance(),a);
         this.name = a.name;
     }
 
@@ -69,6 +67,4 @@ public class Automaton extends AbstractAutomaton<Automaton> {
     public boolean hasName() {
         return name != null;
     }
-
-
 }

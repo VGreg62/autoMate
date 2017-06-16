@@ -58,7 +58,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         Map<State, State> smap = new HashMap<>();
 
         Set<State> vs = a.vertexSet();
-        LOGGER.debug("a {}", a.start.getId());
+        //LOGGER.debug("a {}", a.start.getId());
 
         for (State s : vs) {
             if (!smap.containsKey(s)) {
@@ -365,7 +365,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         fst.add(isect);
         snd.add(isect);
 
-        LOGGER.debug("new split {} {}", fst, snd);
+        //LOGGER.debug("new split {} {}", fst, snd);
 
         return new Tuple<>(fst,snd);
     }
@@ -402,7 +402,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
 
                 toRm.add(prev);
                 toRm.add(t);
-                LOGGER.debug("rm {}", prev);
+                //LOGGER.debug("rm {}", prev);
 
 
             } else {
@@ -464,7 +464,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
             }
         }
 
-        LOGGER.debug(inequality.toString());
+        //LOGGER.debug(inequality.toString());
 
         boolean change;
 
@@ -475,17 +475,17 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
 
             for (Map.Entry<Set<State>, Boolean> e : inequality.entrySet()) {
 
-                LOGGER.debug("CALL with {}", e.getKey());
+                //LOGGER.debug("CALL with {}", e.getKey());
                 if(e.getValue() == false && statesNotEqual(e.getKey(),
                         inequality)) {
-                    LOGGER.debug("{} not equal", e.getKey());
+                    //LOGGER.debug("{} not equal", e.getKey());
                     ineq.add(e.getKey());
                 }
             }
 
             for(Set<State> i : ineq) {
                 if(inequality.get(i) == false) {
-                    LOGGER.debug("set {} to true", i);
+                    //LOGGER.debug("set {} to true", i);
                     inequality.put(i, true);
                     change = true;
                 }
@@ -499,7 +499,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
                         map(e -> e.getKey())
                 .collect(Collectors.toSet());
 
-        LOGGER.debug("tomerge {}", tomerge);
+        //LOGGER.debug("tomerge {}", tomerge);
 
 
 
@@ -619,7 +619,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         for (Transition t : outgoingEdgesOf(s).stream().filter(filter)
                 .collect(Collectors.toSet())) {
 
-            LOGGER.debug("Trans {}", t);
+            //LOGGER.debug("Trans {}", t);
 
             if (!m.containsKey(t.getLabel())) {
                 m.put(t.getLabel(), new HashSet<>());
@@ -628,7 +628,7 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
             m.get(t.getLabel()).add(t.getTarget());
         }
 
-        LOGGER.debug("MM {}", m);
+        //LOGGER.debug("MM {}", m);
 
         return m;
     }

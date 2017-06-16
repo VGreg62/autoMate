@@ -176,7 +176,7 @@ public class BasicOperations <T extends AbstractAutomaton> {
         return concat(fst,snd,true);
     }
 
-    public T concat(T fst, T snd,  boolean rmaccept) {
+    public T concat(T fst, T snd, boolean rmaccept) {
 
         if (fst.isEmpty() && snd.isEmpty()) {
             return provider.getEmtpyAutomaton();
@@ -220,14 +220,17 @@ public class BasicOperations <T extends AbstractAutomaton> {
     }
 
     public T star(T fst) {
-        T opt = optional(fst);
 
+        T opt = provider.getNewAutomaton(fst);
         Set<State> acc = opt.getAcceptStates();
 
         for (State a : acc) {
             opt.addTransition(new Transition(a, opt.start));
         }
-        return postProcess(opt);
+
+        T ret = optional(opt);
+
+        return postProcess(ret);
     }
 
     public T repeatMin(T fst, int min) {
@@ -288,7 +291,8 @@ public class BasicOperations <T extends AbstractAutomaton> {
 
     public T plus(T fst) {
         T pat = provider.getNewAutomaton(fst);
-        return concat(pat, star(pat), false);
+        T star = star(pat);
+        return concat(pat, star, false);
     }
 
     public T append(T fst, char c) {
