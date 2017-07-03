@@ -34,6 +34,7 @@ import org.snt.inmemantlr.GenericParser;
 import org.snt.inmemantlr.exceptions.AstProcessorException;
 import org.snt.inmemantlr.exceptions.CompilationException;
 import org.snt.inmemantlr.exceptions.IllegalWorkflowException;
+import org.snt.inmemantlr.exceptions.ParsingException;
 import org.snt.inmemantlr.listener.DefaultTreeListener;
 
 import java.io.File;
@@ -99,6 +100,9 @@ public enum RegexParser {
             rap = new RegexAstProcessor(dlist.getAst());
         } catch (IllegalWorkflowException e) {
             System.err.println("DNF transformer- intial parsing error");
+            return null;
+        } catch (ParsingException e) {
+            System.err.println("parser error: " + e.getMessage());
             return null;
         }
 
