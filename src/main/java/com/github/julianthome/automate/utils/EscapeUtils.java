@@ -71,9 +71,6 @@ public class EscapeUtils {
                 out.append(c);
             }
             pred = c;
-
-            System.out.println("PRED " + pred);
-            System.out.println("NXT " + c);
         }
         return out.toString();
     }

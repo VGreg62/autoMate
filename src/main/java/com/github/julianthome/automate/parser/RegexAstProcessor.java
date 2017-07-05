@@ -304,13 +304,11 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                             } else if (nomin) {
                                 smap.put(n, fauto.repeatMax(max));
                             } else if (nomax) {
-                                LOGGER.debug("nomax {}", min);
-                                smap.put(n, fauto.repeatMin(min));
+                                smap.put(n, fauto.repeat(min, min));
                             } else {
                                 smap.put(n, fauto.repeat(min, max));
                             }
 
-                            LOGGER.info("min " + min + " max" + max);
                         } else {
                             throw new ParserException("malformed quantifier: " +
                                     "" + quant);

@@ -41,6 +41,9 @@ public class TestRegexParser {
     @Test
     public void simple() {
         AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("c*");
+        Assert.assertTrue(a.match("cccccccccc"));
+        Assert.assertTrue(a.match(""));
+        Assert.assertFalse(a.match("cabacacacac"));
     }
 
     @Test
@@ -138,5 +141,38 @@ public class TestRegexParser {
                 ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
 
     }
+
+    @Test
+    public void testEmail() {
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("[a-z0-9_\".-]+@[da-z\\.-]+\\.[a-z\\.]{2,6}");
+        Assert.assertTrue(a.match("test@uni.lu"));
+        Assert.assertTrue(a.match("ben@uni.edu.lu"));
+        Assert.assertFalse(a.match("hello"));
+        Assert.assertFalse(a.match("hello@gg.l"));
+    }
+
+    @Test
+    public void testIpAddress() {
+        // taken from https://stackoverflow.com/questions/5284147/validating-ipv4-addresses-with-regexp
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("(" +
+                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}" +
+                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+
+        Assert.assertTrue(a.match("127.0.0.1"));
+        Assert.assertTrue(a.match("192.168.1.1"));
+        Assert.assertTrue(a.match("192.168.1.255"));
+        Assert.assertTrue(a.match("255.255.255.255"));
+        Assert.assertTrue(a.match("0.0.0.0"));
+        Assert.assertTrue(a.match("1.1.1.01"));
+
+        Assert.assertFalse(a.match("30.168.1.255.1"));
+        Assert.assertFalse(a.match("127.1"));
+        Assert.assertFalse(a.match("192.168.1.256"));
+        Assert.assertFalse(a.match("-1.2.3.4"));
+        Assert.assertFalse(a.match("3...3"));
+    }
+
+
+    
 
 }
