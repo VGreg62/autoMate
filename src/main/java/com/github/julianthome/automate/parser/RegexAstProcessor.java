@@ -1,20 +1,20 @@
 /**
  * autoMate - yet another automaton library for Java
- *
+ * <p>
  * The MIT License (MIT)
- *
+ * <p>
  * Copyright (c) 2017 Julian Thome <julian.thome.de@gmail.com>
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
  * of the Software, and to permit persons to whom the Software is furnished to do
  * so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -118,7 +118,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 break;
             case "literal":
             case "cc_literal":
-                if(n.getChildren().size() == 0) {
+                if (n.getChildren().size() == 0) {
                     Automaton a = AutomatonFactory.getInstance().getNewAutomaton();
 
                     String lbl = EscapeUtils.unescapeSpecialCharacters(n.getLabel());
@@ -139,7 +139,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
             case "number":
             case "shared_literal":
             case "alternation":
-                if(n.getChildren().size() > 1) {
+                if (n.getChildren().size() > 1) {
                     smap.put(n, unifyChildren(n));
                 } else {
                     //LOGGER.debug(this.ast.toDot());
@@ -147,7 +147,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                     LOGGER.debug("id {} : {}", n.getId(), n.getLabel());
                     assert n.getChildren().size() <= 1;
 
-                    if(n.getChildren().size() > 1)
+                    if (n.getChildren().size() > 1)
                         throw new ParserException("Parsing error for token "
                                 + n.getLabel());
 
@@ -215,15 +215,15 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                 }
                 break;
             case "expr":
-                if(n.getChildren().size() > 1) {
-                    if(!n.getFirstChild().getLabel().equals("^")) {
+                if (n.getChildren().size() > 1) {
+                    if (!n.getFirstChild().getLabel().equals("^")) {
                         smap.put(n, concatChildren(n));
                     } else {
                         // negation
                         assert n.getChildren().size() > 1;
                         List<AstNode> childs = n.getChildren();
                         AbstractAutomaton concat = provider.getNewAutomaton();
-                        for(int i = 1; i < n.getChildren().size(); i++) {
+                        for (int i = 1; i < n.getChildren().size(); i++) {
                             concat = concat.concat(smap.get(n.getChild(i)));
                         }
                         concat = concat.complement();
@@ -245,7 +245,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                     AstNode last = n.getChildren().get(1);
                     AstNode first = n.getChildren().get(0);
 
-                    LOGGER.debug("first:{}, last:{}",first,last);
+                    LOGGER.debug("first:{}, last:{}", first, last);
                     String quant = last.getLabel();
 
                     assert smap.containsKey(first);
@@ -256,7 +256,8 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
 
                     assert fauto != null;
 
-                    Pattern pattern = Pattern.compile("\\{([0-9]*),?([0-9]*)\\}");
+                    Pattern pattern = Pattern.compile("\\{([0-9]*)(,?)" +
+                            "([0-9]*)\\}");
                     Matcher matcher = pattern.matcher(quant);
 
 
@@ -282,6 +283,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
 
                             boolean nomin = false;
                             boolean nomax = false;
+                            boolean sep = false;
 
                             if (matcher.group(1) != null && !matcher.group(1)
                                     .isEmpty()) {
@@ -290,25 +292,28 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                                 nomin = true;
                             }
 
-
                             if (matcher.group(2) != null && !matcher.group(2)
                                     .isEmpty()) {
-                                max = Integer.parseInt(matcher.group(2));
+                                sep = true;
+                            }
+
+                            if (matcher.group(3) != null && !matcher.group(3)
+                                    .isEmpty()) {
+                                max = Integer.parseInt(matcher.group(3));
                             } else {
                                 nomax = true;
                             }
 
-                            if(nomin && nomax) {
+                            if (nomin && nomax) {
                                 throw new ParserException("malformed " +
                                         "quantifier: " + quant);
                             } else if (nomin) {
                                 smap.put(n, fauto.repeatMax(max));
-                            } else if (nomax) {
-                                smap.put(n, fauto.repeat(min, min));
+                            } else if (nomax && sep) {
+                                smap.put(n, fauto.repeatMin(min));
                             } else {
                                 smap.put(n, fauto.repeat(min, max));
                             }
-
                         } else {
                             throw new ParserException("malformed quantifier: " +
                                     "" + quant);
