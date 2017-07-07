@@ -237,6 +237,10 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         return dispatch.minus((T)this, other);
     }
 
+    public String getShortestString() {
+        return dispatch.getShortestString((T)this);
+    }
+
     private void merge(Collection<State> states) {
 
         State first = null;
@@ -299,12 +303,12 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
     }
 
 
-    private Set<State> getConnectedOutNodes(State s) {
+    protected Set<State> getConnectedOutStates(State s) {
         return outgoingEdgesOf(s).stream().map(Transition::getTarget)
                 .collect(Collectors.toSet());
     }
 
-    private Set<State> getConnectedInNodes(State s) {
+    protected Set<State> getConnectedInStates(State s) {
         return incomingEdgesOf(s).stream().map(Transition::getSource)
                 .collect(Collectors.toSet());
     }
@@ -566,8 +570,8 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
             return true;
         }
 
-        Set<State> outas = getConnectedOutNodes(a);
-        Set<State> outbs = getConnectedOutNodes(a);
+        Set<State> outas = getConnectedOutStates(a);
+        Set<State> outbs = getConnectedOutStates(a);
 
         for(State outa : outas) {
             for (State outb : outbs) {
@@ -586,9 +590,8 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
 
 
     private boolean isConnectedToAcceptState(State s) {
-        return getConnectedOutNodes(s).stream().anyMatch(x -> x.isAccept());
+        return getConnectedOutStates(s).stream().anyMatch(x -> x.isAccept());
     }
-
 
 
     protected Map<TransitionLabel, Set<State>> getCombinedTransitionMap

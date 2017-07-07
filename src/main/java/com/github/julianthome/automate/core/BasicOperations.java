@@ -571,4 +571,46 @@ public class BasicOperations <T extends AbstractAutomaton> {
         a.minimize();
         return determinize(a);
     }
+
+    protected String getShortestString(T a) {
+
+        Tuple<State,Set<Transition>> init = new Tuple(a.getStart(),new LinkedHashSet<>());
+
+        Tuple<State,Set<Transition>> shortestsofar = null;
+
+        LinkedList<Tuple<State,Set<Transition>>> wlist = new LinkedList<>();
+
+        wlist.add(init);
+
+        while(!wlist.isEmpty()) {
+            Tuple<State,Set<Transition>> nxt = wlist.pop();
+
+            if(shortestsofar != null && nxt.getVal().size() >= shortestsofar.getVal().size()) {
+                continue;
+            }
+
+            if(nxt.getKey().isAccept()) {
+                shortestsofar = nxt;
+                continue;
+            }
+
+            Set<Transition> out = a.outgoingEdgesOf(nxt.getKey());
+
+            for(Transition s : out) {
+                Set<Transition> trans = new LinkedHashSet<>(nxt.getVal());
+                trans.add(s);
+                Tuple<State,Set<Transition>> ncp = new Tuple(s.getTarget(), trans);
+                wlist.add(ncp);
+            }
+        }
+
+        String s = shortestsofar.getVal()
+                .stream()
+                .map(x -> x.getLabel())
+                .map(y -> !(y instanceof CharRange) ? y.toString() :
+                        ((CharRange)y).getMin() + "").collect(Collectors.joining());
+
+        return s;
+
+    }
 }

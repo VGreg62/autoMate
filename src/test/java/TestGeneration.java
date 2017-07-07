@@ -24,56 +24,31 @@
  * SOFTWARE.
  **/
 
-package com.github.julianthome.automate.utils;
+import com.github.julianthome.automate.core.AbstractAutomaton;
+import com.github.julianthome.automate.parser.RegexParser;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class TestGeneration {
 
-public class Tuple<K, V> {
-    public K key;
-    public V val;
+    final static Logger LOGGER = LoggerFactory.getLogger(TestGeneration.class);
 
-    public Tuple(K key, V val) {
-        this.key = key;
-        this.val = val;
-    }
+    @Test
+    public void testIpAddress() {
+        // taken from https://stackoverflow.com/questions/5284147/validating-ipv4-addresses-with-regexp
+        AbstractAutomaton a = RegexParser.INSTANCE.getAutomaton("(" +
+                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}" +
+                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
 
-    public K getKey() {
-        return key;
-    }
+        String str = a.getShortestString();
 
-    public void setKey(K key) {
-        this.key = key;
-    }
+        LOGGER.debug("shortest string {}", str);
 
-    public V getVal() {
-        return val;
-    }
-
-    public void setVal(V val) {
-        this.val = val;
     }
 
 
-    @Override
-    public String toString() {
-        return key.toString() + " " + val.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        int hc = 0;
-        hc = 37 * hc + key.hashCode();
-        return 37 * hc + val.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if(!(o instanceof Tuple))
-            return false;
-
-        Tuple<K,V> t = (Tuple<K,V>)o;
-
-        return key.equals(t.key) && val.equals(t.val);
-    }
 
 }
+
 

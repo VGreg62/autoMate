@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class CharRange implements TransitionLabel{
+public class CharRange implements TransitionLabel {
 
     final static Logger LOGGER = LoggerFactory.getLogger(CharRange.class);
 
