@@ -2,7 +2,23 @@
 autoMate is an automaton and/or string processing library for Java.
 
 # Status
-[![Build Status](https://travis-ci.org/julianthome/autoMate.svg?branch=master)](https://travis-ci.org/julianthome/autoMate.svg?branch=master)  [![codecov](https://codecov.io/gh/julianthome/autoMate/branch/master/graph/badge.svg)](https://codecov.io/gh/julianthome/autoMate)  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/autoMate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/autoMate/badge.svg)  [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.github.julianthome/autoMate/badge.svg)](http://www.javadoc.io/doc/com.github.julianthome/autoMate) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Language](http://img.shields.io/badge/language-java-brightgreen.svg)](https://www.java.com/)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)][licence]
+[![Language](http://img.shields.io/badge/language-java-brightgreen.svg)][language]
+[![Maven](https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/automate/badge.svg)][maven]
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.github.julianthome/automate/badge.svg)][javadoc]
+[![Linux Build Status](https://img.shields.io/travis/julianthome/automate/master.svg?label=Linux%20build)][travis]
+[![Windows Build status](https://img.shields.io/appveyor/ci/julianthome/automate/master.svg?label=Windows%20build)][appveyor]
+[![Test Coverage](https://codecov.io/gh/julianthome/automate/branch/master/graph/badge.svg)][coverage]
+
+[licence]: https://opensource.org/licenses/mit
+[language]: https://www.java.com
+[maven]: https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/automate
+[javadoc]: http://www.javadoc.io/doc/com.github.julianthome/automate
+[travis]: https://travis-ci.org/julianthome/automate
+[appveyor]: https://ci.appveyor.com/project/julianthome/automate
+[coverage]: https://codecov.io/gh/julianthome/automate
+
 
 # Licence
 
