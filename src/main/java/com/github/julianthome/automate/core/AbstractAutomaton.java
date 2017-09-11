@@ -241,6 +241,10 @@ public abstract class AbstractAutomaton<T extends AbstractAutomaton>
         return dispatch.getShortestString((T)this);
     }
 
+    public String getRandomString(int maxsteps) {
+        return dispatch.getRandomString((T)this, maxsteps);
+    }
+
     private void merge(Collection<State> states) {
 
         State first = null;

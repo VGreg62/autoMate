@@ -28,6 +28,8 @@ package com.github.julianthome.automate.core;
 
 
 import com.github.julianthome.automate.utils.Tuple;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -604,13 +606,72 @@ public class BasicOperations <T extends AbstractAutomaton> {
             }
         }
 
-        String s = shortestsofar.getVal()
-                .stream()
-                .map(x -> x.getLabel())
+
+        return transToString(shortestsofar.val);
+    }
+
+
+    public String getRandomString(T g, int maxsteps) {
+
+        Tuple<State,Set<Transition>> init = new Tuple(g.getStart(),new
+                LinkedHashSet<>());
+
+
+        Tuple<State,Set<Transition>> rs = null;
+
+        LinkedList<Tuple<State,Set<Transition>>> wlist = new LinkedList<>();
+
+        wlist.add(init);
+
+        List<Set<Transition>> bag = new Vector<>();
+
+        while(!wlist.isEmpty()) {
+            Tuple<State,Set<Transition>> nxt = wlist.pop();
+
+            if(maxsteps != -1 && nxt.getVal().size() > maxsteps)
+                continue;
+
+            if(nxt.key.isAccept()) {
+                bag.add(nxt.val);
+                if(Math.random() < 0.5)
+                    break;
+            }
+
+            List<Transition> out = new Vector(g.outgoingEdgesOf(nxt.getKey()));
+
+            if(out.size() > 0) {
+                int ele = new Random().nextInt(out.size());
+                Transition nt = out.get(ele);
+                Set<Transition> trans = new LinkedHashSet<>(nxt.getVal());
+                trans.add(out.get(ele));
+                Tuple<State, Set<Transition>> ncp = new Tuple(nt.getTarget(), trans);
+                wlist.add(ncp);
+            }
+        }
+
+
+        assert bag.size() > 0;
+
+        int rele = new Random().nextInt(bag.size());
+
+        return transToString(bag.get(rele));
+    }
+
+
+    private Collection<Transition> getShortest(T g, State a, State b) {
+        DijkstraShortestPath<State,Transition> p = new
+                DijkstraShortestPath<State, Transition>(g);
+        GraphPath<State,Transition> gp = p.getPath(a,b);
+        return gp.getEdgeList();
+    }
+
+
+    private String transToString(Collection<Transition> t) {
+        return t.stream().map(x -> x.getLabel())
                 .map(y -> !(y instanceof CharRange) ? y.toString() :
                         ((CharRange)y).getMin() + "").collect(Collectors.joining());
-
-        return s;
-
     }
+
+
+
 }

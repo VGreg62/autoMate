@@ -26,6 +26,7 @@
 
 import com.github.julianthome.automate.core.AbstractAutomaton;
 import com.github.julianthome.automate.parser.RegexParser;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,15 @@ public class TestGeneration {
                 "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}" +
                 "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
 
-        String str = a.getShortestString();
+        String shortest = a.getShortestString();
 
-        LOGGER.debug("shortest string {}", str);
+        Assert.assertEquals(shortest.length(), 7);
+
+
+        for(int i = 0; i < 100; i++) {
+            String random = a.getRandomString(100);
+            Assert.assertTrue(a.match(random));
+        }
 
     }
 
