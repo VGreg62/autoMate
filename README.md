@@ -5,16 +5,12 @@ autoMate is an automaton and/or string processing library for Java.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)][licence]
 [![Language](http://img.shields.io/badge/language-java-brightgreen.svg)][language]
-[![Maven](https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/autoMate/badge.svg)][maven]
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.github.julianthome/autoMate/badge.svg)][javadoc]
 [![Linux Build Status](https://img.shields.io/travis/julianthome/autoMate/master.svg?label=Linux%20build)][travis]
 [![Windows Build status](https://img.shields.io/appveyor/ci/julianthome/autoMate/master.svg?label=Windows%20build)][appveyor]
 [![Test Coverage](https://codecov.io/gh/julianthome/autoMate/branch/master/graph/badge.svg)][coverage]
 
 [licence]: https://opensource.org/licenses/mit
 [language]: https://www.java.com
-[maven]: https://maven-badges.herokuapp.com/maven-central/com.github.julianthome/autoMate
-[javadoc]: http://www.javadoc.io/doc/com.github.julianthome/autoMate
 [travis]: https://travis-ci.org/julianthome/autoMate
 [appveyor]: https://ci.appveyor.com/project/julianthome/autoMate
 [coverage]: https://codecov.io/gh/julianthome/autoMate
