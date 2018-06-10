@@ -26,13 +26,13 @@
 
 package com.github.julianthome.automate.core;
 
+import com.github.julianthome.automate.exception.NotImplementedException;
 import com.github.julianthome.automate.slicer.AutomatonSlicerBackward;
 import com.github.julianthome.automate.slicer.AutomatonSlicerForward;
 import com.github.julianthome.automate.utils.Tuple;
 import org.jgrapht.graph.DirectedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 import java.util.function.Predicate;
