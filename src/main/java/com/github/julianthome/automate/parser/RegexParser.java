@@ -31,9 +31,9 @@ import com.github.julianthome.automate.core.AbstractAutomaton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snt.inmemantlr.GenericParser;
-import org.snt.inmemantlr.exceptions.AstProcessorException;
 import org.snt.inmemantlr.exceptions.CompilationException;
 import org.snt.inmemantlr.exceptions.IllegalWorkflowException;
+import org.snt.inmemantlr.exceptions.ParseTreeProcessorException;
 import org.snt.inmemantlr.exceptions.ParsingException;
 import org.snt.inmemantlr.listener.DefaultTreeListener;
 
@@ -89,15 +89,15 @@ public enum RegexParser {
 
     public AbstractAutomaton getAutomaton(String rexp) {
 
-        RegexAstProcessor rap = null;
+        RegexProcessor rap = null;
         AbstractAutomaton ret = null;
 
         try {
             gp.parse(rexp);
 
-            LOGGER.debug(dlist.getAst().toDot());
+            LOGGER.debug(dlist.getParseTree().toDot());
 
-            rap = new RegexAstProcessor(dlist.getAst());
+            rap = new RegexProcessor(dlist.getParseTree());
         } catch (IllegalWorkflowException e) {
             System.err.println("DNF transformer- intial parsing error");
             return null;
@@ -107,13 +107,13 @@ public enum RegexParser {
         }
 
 
-        LOGGER.debug(dlist.getAst().toDot());
+        LOGGER.debug(dlist.getParseTree().toDot());
 
 
         try {
             rap.process();
             ret = rap.getResult();
-        } catch (AstProcessorException e) {
+        } catch (ParseTreeProcessorException e) {
             LOGGER.error("cannot construct automaton {}", e.getMessage());
             System.exit(-1);
         }

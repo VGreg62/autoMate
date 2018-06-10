@@ -33,34 +33,34 @@ import com.github.julianthome.automate.core.AutomatonProvider;
 import com.github.julianthome.automate.utils.EscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snt.inmemantlr.tree.Ast;
-import org.snt.inmemantlr.tree.AstNode;
-import org.snt.inmemantlr.tree.AstProcessor;
+import org.snt.inmemantlr.tree.ParseTree;
+import org.snt.inmemantlr.tree.ParseTreeNode;
+import org.snt.inmemantlr.tree.ParseTreeProcessor;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractAutomaton> {
+public class RegexProcessor extends ParseTreeProcessor<AbstractAutomaton, AbstractAutomaton> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(RegexParser.class);
 
 
     private AutomatonProvider provider = null;
 
-    public RegexAstProcessor(Ast ast) {
+    public RegexProcessor(ParseTree ast) {
         this(ast, AutomatonFactory.getInstance());
     }
 
-    public RegexAstProcessor(Ast ast, AutomatonProvider provider) {
+    public RegexProcessor(ParseTree ast, AutomatonProvider provider) {
         super(ast);
         this.provider = provider;
     }
 
     @Override
     public AbstractAutomaton getResult() {
-        return smap.get(ast.getRoot());
+        return smap.get(parseTree.getRoot());
     }
 
     @Override
@@ -68,10 +68,10 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
 
     }
 
-    private AbstractAutomaton concatChildren(AstNode n) {
+    private AbstractAutomaton concatChildren(ParseTreeNode n) {
         LOGGER.debug("expr");
         AbstractAutomaton cc = null;
-        for (AstNode c : n.getChildren()) {
+        for (ParseTreeNode c : n.getChildren()) {
             if (cc == null) {
                 cc = smap.get(c);
                 continue;
@@ -81,10 +81,10 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
         return cc;
     }
 
-    private AbstractAutomaton unifyChildren(AstNode n) {
+    private AbstractAutomaton unifyChildren(ParseTreeNode n) {
         LOGGER.debug("expr");
         AbstractAutomaton cc = null;
-        for (AstNode c : n.getChildren()) {
+        for (ParseTreeNode c : n.getChildren()) {
             if (cc == null) {
                 cc = smap.get(c);
                 continue;
@@ -95,7 +95,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
     }
 
     @Override
-    protected void process(AstNode n) throws ParserException {
+    protected void process(ParseTreeNode n) throws ParserException {
 
         LOGGER.debug("++++++++++++++++++++++++++ {}:{}", n.getRule(), n.getId());
 
@@ -194,7 +194,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
 
                 if (n.getChildren().size() > 1) {
 
-                    for (AstNode c : n.getChildren()) {
+                    for (ParseTreeNode c : n.getChildren()) {
 
                         if (na == null) {
                             na = smap.get(c);
@@ -221,7 +221,7 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                     } else {
                         // negation
                         assert n.getChildren().size() > 1;
-                        List<AstNode> childs = n.getChildren();
+                        List<ParseTreeNode> childs = n.getChildren();
                         AbstractAutomaton concat = provider.getNewAutomaton();
                         for (int i = 1; i < n.getChildren().size(); i++) {
                             concat = concat.concat(smap.get(n.getChild(i)));
@@ -242,8 +242,8 @@ public class RegexAstProcessor extends AstProcessor<AbstractAutomaton, AbstractA
                     simpleProp(n);
                 } else if (n.getChildren().size() == 2) {
 
-                    AstNode last = n.getChildren().get(1);
-                    AstNode first = n.getChildren().get(0);
+                    ParseTreeNode last = n.getChildren().get(1);
+                    ParseTreeNode first = n.getChildren().get(0);
 
                     LOGGER.debug("first:{}, last:{}", first, last);
                     String quant = last.getLabel();

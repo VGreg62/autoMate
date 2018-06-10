@@ -26,9 +26,9 @@
 
 package com.github.julianthome.automate.parser;
 
-import org.snt.inmemantlr.exceptions.AstProcessorException;
+import org.snt.inmemantlr.exceptions.ParseTreeProcessorException;
 
-public class ParserException extends AstProcessorException {
+public class ParserException extends ParseTreeProcessorException {
     ParserException(String message) {
         super(message);
     }
